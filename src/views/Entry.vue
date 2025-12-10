@@ -18,17 +18,19 @@
       <div class="row g-4">
         <div class="col-xl-3 col-lg-4 col-md-6" v-for="meme in allMemes" :key="meme.id">
           <div class="card h-100 liquid-glass-card meme-card">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-2">
-                <div class="badge liquid-badge">{{ meme.category }}</div>
-                <small class="text-muted">{{ meme.date }}</small>
-              </div>
-              <h3 class="card-title h5">{{ meme.title }}</h3>
-              <p class="card-text">{{ meme.description }}</p>
-              <div class="d-flex justify-content-between align-items-center">
-                <div class="tags">
+            <div class="liquid-glass-card-hover">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div class="badge liquid-badge">{{ meme.category }}</div>
+                  <small class="text-muted">{{ meme.date }}</small>
                 </div>
-                <a href="#" class="btn btn-outline-primary btn-sm liquid-glass-btn">了解更多</a>
+                <h3 class="card-title h5">{{ meme.title }}</h3>
+                <p class="card-text">{{ meme.description }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="tags">
+                  </div>
+                  <a href="#" class="btn btn-outline-primary btn-sm liquid-glass-btn">了解更多</a>
+                </div>
               </div>
             </div>
           </div>
@@ -156,9 +158,9 @@ export default {
 
 .liquid-glass-card {
   background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 
     0 8px 32px rgba(31, 38, 135, 0.1),
@@ -183,11 +185,11 @@ export default {
 }
 
 .liquid-glass-card:hover {
-  transform: translateY(-8px) scale(1.02);
+  transform: translateY(-10px) scale(1.03);
   box-shadow: 
-    0 15px 45px rgba(31, 38, 135, 0.2),
-    inset 0 2px 12px rgba(255, 255, 255, 0.4),
-    inset 0 -2px 12px rgba(0, 0, 0, 0.08);
+    0 20px 50px rgba(31, 38, 135, 0.25),
+    inset 0 2px 15px rgba(255, 255, 255, 0.5),
+    inset 0 -2px 15px rgba(0, 0, 0, 0.1);
 }
 
 .liquid-glass-card:hover::before {
@@ -214,25 +216,28 @@ export default {
 
 .tag-badge {
   background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  border-radius: 15px;
   font-weight: normal;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .tag-badge:hover {
-  background: rgba(13, 110, 253, 0.2);
-  transform: translateY(-2px);
+  background: rgba(13, 110, 253, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .liquid-glass-btn {
   background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 15px;
+  border-radius: 18px;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   overflow: hidden;
   position: relative;
@@ -251,9 +256,9 @@ export default {
 }
 
 .liquid-glass-btn:hover {
-  background: rgba(255, 255, 255, 0.5);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.6);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
 .liquid-glass-btn:hover::before {
