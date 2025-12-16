@@ -97,20 +97,21 @@
           <div class="contact-info liquid-glass-card d-inline-block p-4">
             <div class="liquid-glass-card-hover">
               <p class="mb-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope me-2" viewBox="0 0 16 16">
-                <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2zm13 2.383-4.758 2.855L15 11.114v-5.73zm-.034 6.878L9.271 8.82 8 9.583 6.728 8.82l-5.694 3.44A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.739zM1 11.114l4.758-2.876L1 5.383v5.73z"/>
-              </svg>
-              nico6719@qq.com
-            </p>
-            <p class="mb-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-square-dots me-2" viewBox="0 0 16 16">
-                <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-2.5a2 2 0 0 0-1.6.8L8 14.333 6.1 11.8a2 2 0 0 0-1.6-.8H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2.5a1 1 0 0 1 .8.4l1.9 2.533a1 1 0 0 0 1.6 0l1.9-2.533a1 1 0 0 1 .8-.4H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-                <path d="M5 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
-              </svg>
-                <a href="https://qm.qq.com/q/hBcOiafEti" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-white-50">
-            QQ群
-            </a>
-          </div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope me-2" viewBox="0 0 16 16">
+                  <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2zm13 2.383-4.758 2.855L15 11.114v-5.73zm-.034 6.878L9.271 8.82 8 9.583 6.728 8.82l-5.694 3.44A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.739zM1 11.114l4.758-2.876L1 5.383v5.73z"/>
+                </svg>
+                nico6719@qq.com
+              </p>
+              <p class="mb-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-square-dots me-2" viewBox="0 0 16 16">
+                  <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-2.5a2 2 0 0 0-1.6.8L8 14.333 6.1 11.8a2 2 0 0 0-1.6-.8H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2.5a1 1 0 0 1 .8.4l1.9 2.533a1 1 0 0 0 1.6 0l1.9-2.533a1 1 0 0 1 .8-.4H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                  <path d="M5 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                </svg>
+                <button @click="openQQGroup" class="btn btn-link text-decoration-none text-white-50 p-0 border-0 bg-transparent d-inline align-baseline">
+                  点击加入QQ群
+                </button>
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -120,7 +121,13 @@
 
 <script>
 export default {
-  name: 'About'
+  name: 'About',
+  methods: {
+    openQQGroup() {
+      // 打开QQ群链接
+      window.open('https://qm.qq.com/q/hBcOiafEti', '_blank', 'noopener,noreferrer');
+    }
+  }
 }
 </script>
 
@@ -201,6 +208,21 @@ export default {
   box-shadow: 0 15px 45px 0 rgba(31, 38, 135, 0.3);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
+}
+
+.btn-link {
+  cursor: pointer;
+  text-decoration: none !important;
+}
+
+.btn-link:hover {
+  text-decoration: underline !important;
+  color: #6c757d !important;
+}
+
+.btn-link:focus {
+  box-shadow: none;
+  outline: none;
 }
 
 @keyframes fadeInDown {
