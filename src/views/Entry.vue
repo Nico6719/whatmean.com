@@ -65,32 +65,43 @@
                 </div>
                 <h3 class="card-title h5">{{ entry.name }}</h3>
                 <p class="card-text">{{ entry.explanation }}</p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="tags">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                  <div class="tags w-100 mb-2">
                     <span 
-                      v-for="(tag, index) in entry.tags.split(',')" 
+                      v-for="(tag, index) in (entry.tags || '').split(',')" 
                       :key="index" 
                       class="badge tag-badge me-1"
+                      v-show="tag.trim() !== ''"
                     >
                       {{ tag.trim() }}
                     </span>
                   </div>
-                  <a href="#" class="btn btn-outline-primary btn-sm liquid-glass-btn">了解更多</a>
+                  <div class="ms-auto">
+                    <a href="#" class="btn btn-outline-primary btn-sm liquid-glass-btn" @click.prevent="showEntryDetail(entry)">了解更多</a>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+      </div>
+  
+  <!-- 词条详情模态框 -->
+  <MorphModal 
+    :is-visible="showModal" 
+    :entry="selectedEntry" 
+    @close="showModal = false"
+  />
   <!-- 添加额外的间距 -->
   <div class="mb-5"></div>
+</div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import entriesApi from '../services/api';
+import MorphModal from '../components/MorphModal.vue';
 
 // 状态管理
 const entries = ref([]);
@@ -98,6 +109,14 @@ const loading = ref(false);
 const error = ref(null);
 const searchQuery = ref('');
 const originalEntries = ref([]);
+const showModal = ref(false);
+const selectedEntry = ref({});
+
+// 显示词条详情
+const showEntryDetail = (entry) => {
+  selectedEntry.value = entry;
+  showModal.value = true;
+};
 
 // 获取所有词条
 const fetchEntries = async () => {
@@ -208,21 +227,50 @@ onMounted(() => {
 }
 
 .tag-badge {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 15px;
-  font-weight: normal;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  font-weight: 500;
+  padding: 0.4em 1em;
+  margin-bottom: 0.3rem;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 
+    0 2px 8px rgba(31, 38, 135, 0.1),
+    inset 0 1px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -1px 4px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  color: #000; /* 默认黑色文字 */
+}
+
+.tag-badge::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  background: linear-gradient(45deg, rgba(255,255,255,0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .tag-badge:hover {
-  background: rgba(13, 110, 253, 0.3);
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(102, 51, 153, 0.4); /* 紫色配色 */
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 
+    0 6px 15px rgba(102, 51, 153, 0.2),
+    inset 0 1px 8px rgba(255, 255, 255, 0.6),
+    inset 0 -1px 8px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  color: #fff; /* 悬停时白色文字 */
+}
+
+.tag-badge:hover::before {
+  opacity: 1;
 }
 
 .liquid-glass-btn {
