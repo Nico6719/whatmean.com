@@ -202,9 +202,6 @@ export default {
   color: #444;
   line-height: 1.6;
   margin: 0 0 1rem 0;
-}
-
-.entry-detail-text {
   white-space: pre-line;
 }
 

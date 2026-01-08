@@ -11,15 +11,26 @@ const apiClient = axios.create({
 // 使用 import.meta.glob 在编译时导入所有 entry 目录下的 JSON 文件
 const entryModules = import.meta.glob('../../entry/*.json', { eager: true, import: 'default' });
 
+// 处理文本内容中的换行符
+const processTextContent = (text) => {
+  if (typeof text === 'string') {
+    // 将 \n 转换为换行符
+    return text.replace(/\\n/g, '\n');
+  }
+  return text;
+};
+
 // 将导入的模块转换为 entries 数组
 const staticEntries = Object.entries(entryModules).map(([filePath, data], index) => ({
   id: index + 1,
-  name: data['词条名'] || '',
-  explanation: data['词条介绍'] || '',
-  detail: data['详细介绍'] || '',
-  year: data['词条年份'] || '',
-  tags: data['标签'] || '',
-  ...data
+  name: processTextContent(data['词条名']) || '',
+  explanation: processTextContent(data['词条介绍']) || '',
+  detail: processTextContent(data['详细介绍']) || '',
+  year: processTextContent(data['词条年份']) || '',
+  tags: processTextContent(data['标签']) || '',
+  ...Object.fromEntries(
+    Object.entries(data).map(([key, value]) => [key, processTextContent(value)])
+  )
 }));
 
 // API方法
