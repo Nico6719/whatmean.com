@@ -2,7 +2,7 @@
   <div class="index-page">
     <!-- Hero Section -->
     <div class="hero-section">
-      <div class="container-fluid h-100 d-flex align-items-center">
+      <div class="container-fluid h-100 d-flex align-items-center justify-content-center">
         <div class="row w-100">
           <div class="col-12 text-center text-white">
             <h1 class="display-2 fw-bold mb-4 hero-title">何意味.com</h1>
