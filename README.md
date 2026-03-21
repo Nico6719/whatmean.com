@@ -37,12 +37,12 @@
    
    您可以通过以下任一方式提交词条：
    
-   - **GitHub Pull Request**：
+   - **GitHub Pull Request（推荐）**：
      1. Fork 本仓库
      2. 在 `entry` 目录下添加您的 JSON 文件
      3. 提交 Pull Request
    
-   - **邮件提交**：
+   - **邮件提交（不推荐）**：
      将您的 JSON 文件发送至 Nico6719@qq.com
    
    - **网站提交表单**：
