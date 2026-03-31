@@ -62,21 +62,6 @@ export default {
           url: 'https://www.minebbs.com/'
         },
         {
-          name: 'MDN Web 文档',
-          description: '网络开发文档',
-          url: 'https://developer.mozilla.org/'
-        },
-        {
-          name: 'Bootstrap',
-          description: '最受欢迎的前端框架',
-          url: 'https://getbootstrap.com/'
-        },
-        {
-          name: 'Stack Overflow',
-          description: '程序员问答社区',
-          url: 'https://stackoverflow.com/'
-        },
-        {
           name: '梦涵LOVEの小窝',
           description: '一个一个小涵子的小BLOG，一起来分享生活的小确幸吧~',
           url: 'https://heyuhan.huohuo.ink/'
