@@ -385,26 +385,27 @@ onMounted(() => {
     padding-left: 1rem;
     padding-right: 1rem;
   }
-  
+
   .g-4 {
     --bs-gutter-x: 1rem;
   }
-  
+
   .liquid-glass-card {
     border-radius: 16px;
   }
-  
+
   .input-group {
     width: 100% !important;
   }
-  
+
   .liquid-glass-input,
   .input-group .btn-primary {
     border-radius: 20px;
+    height: 44px;
   }
-  
+
   .input-group .btn-primary {
-    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
   }
 }
 </style>

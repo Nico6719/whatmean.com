@@ -7,16 +7,6 @@
         </h1>
         
         <div class="d-flex align-items-center">
-          <!-- 桌面端搜索框 -->
-          <div class="input-group me-3 d-none d-md-flex glass-search" style="width: 250px;">
-            <input type="text" class="form-control form-control-sm" placeholder="搜索热梗..." aria-label="搜索热梗">
-            <button class="btn btn-light text-primary" type="button">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-              </svg>
-            </button>
-          </div>
-          
           <!-- 桌面端导航菜单 -->
           <nav class="d-none d-md-block">
             <ul class="nav">
@@ -55,16 +45,6 @@
       
       <!-- 移动端折叠导航菜单 -->
       <div class="collapse d-md-none mt-2" :class="{ show: mobileMenuOpen }" id="navbarNav">
-        <div class="glass-search-mobile d-md-none mb-3 px-3 py-2 rounded">
-          <div class="input-group">
-            <input type="text" class="form-control bg-transparent text-white" placeholder="搜索热梗..." aria-label="搜索热梗">
-            <button class="btn btn-light text-primary" type="button">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-              </svg>
-            </button>
-          </div>
-        </div>
         <ul class="nav flex-column">
           <li class="nav-item">
             <router-link class="nav-link text-white" to="/" @click="closeMobileMenu">首页</router-link>
