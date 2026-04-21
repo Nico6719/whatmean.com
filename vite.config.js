@@ -5,6 +5,9 @@ import { resolve } from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
+  preview: {
+    allowedHosts: true
+  },
   plugins: [
     vue(),
     vueDevTools(),
@@ -15,6 +18,8 @@ export default defineConfig({
     }
   },
   build: {
+    // 禁用 CSS 压缩，避免 lightningcss 误删 backdrop-filter 标准属性
+    cssMinify: false,
     rollupOptions: {
       output: {
         manualChunks: undefined,

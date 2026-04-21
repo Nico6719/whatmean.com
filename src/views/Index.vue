@@ -5,7 +5,7 @@
       <div class="container-fluid h-100 d-flex align-items-center justify-content-center">
         <div class="row w-100">
           <div class="col-12 text-center text-white">
-            <h1 class="display-2 fw-bold mb-4 hero-title">何意味.com</h1>
+            <h1 class="display-2 fw-bold mb-4 hero-title">何意味<span class="domain">.com</span></h1>
             <p class="lead fs-3 mb-5 hero-subtitle">记录时代的网络文化符号</p>
             <div class="search-box liquid-glass-search mx-auto">
               <input 
@@ -48,11 +48,11 @@ export default {
   },
   head() {
     return {
-      title: '何意味.com - 网络热梗百科，记录时代的网络文化符号',
+      title: '何意味 - 网络热梗百科，记录时代的网络文化符号',
       meta: [
-        { name: 'description', content: '何意味.com致力于收集、整理和传播中国互联网上的各类热门梗、流行语和网络文化现象。搜索和浏览海量网络热梗。' },
-        { property: 'og:title', content: '何意味.com - 网络热梗百科' },
-        { property: 'og:description', content: '记录时代的网络文化符号。搜索和浏览海量网络热梗。' },
+        { name: 'description', content: '何意味致力于收集、整理和传播中国互联网上的各类热门梗、流行语和网络文化现象。搜索和浏览海量网络炭梗。' },
+        { property: 'og:title', content: '何意味 - 网络炭梗百科' },
+        { property: 'og:description', content: '记录时代的网络文化符号。搜索和浏览海量网络炭梗。' },
         { property: 'og:url', content: 'https://xn--vqqq8jxym.com/' }
       ]
     }
@@ -74,19 +74,27 @@ export default {
 .index-page {
   min-height: 100vh;
   background-color: transparent;
+  /* 抵消 App.vue 统一的 64px padding-top，让 hero 保持真正全屏 */
+  margin-top: -64px;
 }
 
 .hero-section {
   height: 100vh;
   min-height: 500px;
-  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-              url('/background.webp') center/cover no-repeat;
+  /* 背景图由 body 提供，这里只加一层暗色遯层增强可读性 */
+  background: linear-gradient(rgba(0, 0, 0, 0.40), rgba(0, 0, 0, 0.40));
   position: relative;
 }
 
 .hero-title {
   animation: fadeInDown 1s ease;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.domain {
+  font-size: 0.6em;
+  opacity: 0.85;
+  margin-left: 0.1em;
 }
 
 .hero-subtitle {
@@ -99,14 +107,17 @@ export default {
   animation: fadeInUp 1s ease 0.6s both;
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: 50px;
   padding: 8px 15px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
-  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   overflow: hidden;
   position: relative;
 }
@@ -149,12 +160,13 @@ export default {
   animation: fadeInUp 1s ease 0.9s both;
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* 标准毛玻璃描边 */
+  border: 1px solid rgba(255, 255, 255, 0.14);
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   box-shadow: 
     0 4px 20px rgba(0, 0, 0, 0.2),
-    inset 0 2px 8px rgba(255, 255, 255, 0.3),
-    inset 0 -2px 8px rgba(0, 0, 0, 0.05);
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08);
   overflow: hidden;
   position: relative;
 }
@@ -222,4 +234,5 @@ export default {
     font-size: 0.9rem;
   }
 }
+
 </style>

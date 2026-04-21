@@ -1,23 +1,42 @@
 <script setup>
+import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import Header from './components/Header.vue'
 import Footer from './components/Footer.vue'
+
+const route = useRoute()
+const transitionName = ref('page-fade')
+
+const routeOrder = ['/', '/entries', '/entry-generator', '/about', '/friends']
+
+watch(
+  () => route.path,
+  (to, from) => {
+    const toIdx = routeOrder.indexOf(to)
+    const fromIdx = routeOrder.indexOf(from)
+    if (toIdx > fromIdx) {
+      transitionName.value = 'page-slide-left'
+    } else if (toIdx < fromIdx) {
+      transitionName.value = 'page-slide-right'
+    } else {
+      transitionName.value = 'page-fade'
+    }
+  }
+)
 </script>
 
 <template>
   <div class="app-container">
-    <!-- 网站头部 -->
     <Header />
-    
-    <div class="container-fluid flex-fill">
-      <div class="row h-100">
-        <!-- 主要内容区域 -->
-        <div class="col-12">
-          <router-view></router-view>
-        </div>
-      </div>
+
+    <div class="main-content">
+      <router-view v-slot="{ Component }">
+        <transition :name="transitionName" mode="out-in">
+          <component :is="Component" :key="route.path" class="page-wrapper" />
+        </transition>
+      </router-view>
     </div>
-    
-    <!-- 网站底部 -->
+
     <Footer />
   </div>
 </template>
@@ -27,25 +46,61 @@ import Footer from './components/Footer.vue'
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-image: url('/background.webp');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: scroll;
 }
 
-.container-fluid {
-  padding: 0;
+.main-content {
   flex: 1;
-  max-width: 100%;
+  padding-top: 64px;
+  overflow: hidden;
 }
 
-.row {
-  flex: 1;
-  margin: 0;
+/* ===== 页面切换动画 =====
+   使用 mode="out-in"：旧页面先离开，新页面再进入
+   通过 contain: layout 限制重排范围，避免 Footer 被顶上来
+*/
+
+/* Fade（默认）*/
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition: opacity 0.35s ease;
+}
+.page-fade-enter-from,
+.page-fade-leave-to {
+  opacity: 0;
 }
 
-.col-12 {
-  padding: 0;
+/* 向左滑入（前进） */
+.page-slide-left-enter-active,
+.page-slide-left-leave-active {
+  transition: opacity 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.page-slide-left-enter-from {
+  opacity: 0;
+  transform: translateX(40px);
+}
+.page-slide-left-leave-to {
+  opacity: 0;
+  transform: translateX(-40px);
+}
+
+/* 向右滑入（后退） */
+.page-slide-right-enter-active,
+.page-slide-right-leave-active {
+  transition: opacity 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.page-slide-right-enter-from {
+  opacity: 0;
+  transform: translateX(-40px);
+}
+.page-slide-right-leave-to {
+  opacity: 0;
+  transform: translateX(40px);
+}
+
+/* 页面容器 */
+.page-wrapper {
+  /* 移除 contain: layout，因为它会创建一个新的包含块，导致子元素的 fixed 定位相对于该容器而非视口 */
 }
 </style>

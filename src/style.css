@@ -1,56 +1,88 @@
+/* ===================================================
+   全局样式 + 浅色/深色模式 CSS 变量
+   通过 html[data-theme="light"|"dark"] 切换
+   =================================================== */
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light;
-  color: #213547;
-  background-color: #f0f2f5;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  
-  /* 主色调：蓝色 */
+
+  /* 主色调 */
   --primary-color: #0d6efd;
-  /* 辅助色调：白色 */
   --secondary-color: #ffffff;
-  /* 背景色 */
-  --background-color: #f0f2f5;
-  /* 文字颜色 */
-  --text-color: #213547;
-  /* 边框颜色 */
-  --border-color: #dee2e6;
-  
-  /* 玻璃拟态颜色 */
-  --glass-bg-light: rgba(255, 255, 255, 0.25);
-  --glass-bg-medium: rgba(255, 255, 255, 0.55);
-  --glass-bg-strong: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.18);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-  --glass-shadow-hover: 0 12px 40px 0 rgba(31, 38, 135, 0.25);
-  
-  /* 液态玻璃效果颜色 */
-  --liquid-glass-bg: rgba(255, 255, 255, 0.55);
-  --liquid-glass-border: rgba(255, 255, 255, 0.18);
-  --liquid-glass-shadow: 
-    0 8px 32px rgba(31, 38, 135, 0.1),
-    inset 0 2px 8px rgba(255, 255, 255, 0.3),
-    inset 0 -2px 8px rgba(0, 0, 0, 0.05);
-  --liquid-glass-shadow-hover: 
-    0 15px 45px rgba(31, 38, 135, 0.2),
-    inset 0 2px 12px rgba(255, 255, 255, 0.4),
-    inset 0 -2px 12px rgba(0, 0, 0, 0.08);
+
+  /* 毛玻璃描边专用变量 */
+  --frost-border-width: 1.5px;
+  --frost-border-top: rgba(255, 255, 255, 0.72);
+  --frost-border-bottom: rgba(255, 255, 255, 0.18);
+  --frost-border-side: rgba(255, 255, 255, 0.38);
+  --frost-inner-top: rgba(255, 255, 255, 0.55);
+  --frost-inner-bottom: rgba(0, 0, 0, 0.06);
+  --frost-glow: 0 0 0 1px rgba(255,255,255,0.12);
 }
 
+/* ===== 深色模式（默认，背景为夜景图）===== */
+html[data-theme="dark"],
+html:not([data-theme]) {
+  color-scheme: dark;
+  --background-color: #0d1117;
+  --text-color: #e6edf3;
+  --border-color: rgba(255, 255, 255, 0.12);
+  --card-text: rgba(255, 255, 255, 0.85);
+  --card-text-muted: rgba(255, 255, 255, 0.55);
+
+  /* 卡片背景 */
+  --card-bg: rgba(0, 0, 0, 0.30);
+  --card-bg-hover: rgba(0, 0, 0, 0.40);
+
+  /* 玻璃拟态 */
+  --glass-bg-light: rgba(255, 255, 255, 0.08);
+  --glass-bg-medium: rgba(255, 255, 255, 0.12);
+  --glass-bg-strong: rgba(255, 255, 255, 0.20);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+  --glass-shadow-hover: 0 12px 40px 0 rgba(0, 0, 0, 0.50);
+
+  /* 液态玻璃 */
+  --liquid-glass-bg: rgba(0, 0, 0, 0.30);
+  --liquid-glass-border: rgba(255, 255, 255, 0.12);
+  --liquid-glass-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.30),
+    inset 0 2px 8px rgba(255, 255, 255, 0.08),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.15);
+  --liquid-glass-shadow-hover:
+    0 15px 45px rgba(0, 0, 0, 0.45),
+    inset 0 2px 12px rgba(255, 255, 255, 0.12),
+    inset 0 -2px 12px rgba(0, 0, 0, 0.20);
+
+  /* 背景图 */
+  --bg-image: url('/background.webp');
+  --bg-overlay: rgba(0, 0, 0, 0.15);
+
+  /* Header 滚动后背景 */
+  --header-scrolled-bg: rgba(15, 25, 50, 0.72);
+
+  /* Footer */
+  --footer-bg: rgba(255, 255, 255, 0.08);
+  --footer-border: rgba(255, 255, 255, 0.10);
+}
+
+
+
+/* ===== 基础样式 ===== */
 a {
   font-weight: 500;
-  color: #0d6efd;
+  color: var(--primary-color);
   text-decoration: inherit;
 }
 a:hover {
-  color: #0d6efd;
+  color: var(--primary-color);
 }
 
 body {
@@ -58,9 +90,22 @@ body {
   min-width: 320px;
   min-height: 100vh;
   overflow-x: hidden;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  /* 背景图设在 body 上，是 backdrop-filter 能正确模糊的关键 */
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
+
+
 #app {
+  position: relative;
+  z-index: 1;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -70,17 +115,14 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-color);
 }
 
-/* 玻璃拟态卡片样式 */
+/* ===== 玻璃拟态卡片 ===== */
 .glass-card {
   background: var(--glass-bg-medium);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 24px;
   border: 1px solid var(--glass-border);
-  box-shadow: 
-    0 8px 32px rgba(31, 38, 135, 0.1),
-    inset 0 2px 8px rgba(255, 255, 255, 0.3),
-    inset 0 -2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--glass-shadow);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   overflow: hidden;
   position: relative;
@@ -101,7 +143,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .glass-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 16px 40px rgba(31, 38, 135, 0.2);
+  box-shadow: var(--glass-shadow-hover);
 }
 
 .glass-card:hover::before {
@@ -111,7 +153,7 @@ h1, h2, h3, h4, h5, h6 {
   bottom: -15px;
 }
 
-/* 玻璃拟态按钮样式 */
+/* ===== 玻璃拟态按钮 ===== */
 .glass-btn {
   background: var(--glass-bg-light);
   backdrop-filter: blur(8px);
@@ -136,7 +178,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .glass-btn:hover {
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--glass-bg-strong);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
@@ -145,7 +187,7 @@ h1, h2, h3, h4, h5, h6 {
   opacity: 1;
 }
 
-/* 卡片样式优化 */
+/* ===== 通用卡片 ===== */
 .card {
   border: 1px solid var(--border-color);
   border-radius: 12px;
@@ -154,10 +196,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.25);
+  box-shadow: var(--glass-shadow-hover);
 }
 
-/* 按钮样式优化 */
+/* ===== 按钮 ===== */
 .btn {
   border-radius: 12px;
   font-weight: 500;
@@ -176,39 +218,18 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
 }
 
-/* 导航栏样式优化 */
-.nav-link {
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-/* 响应式设计 */
+/* ===== 响应式 ===== */
 @media (max-width: 768px) {
   body {
     padding-left: 0;
     padding-right: 0;
   }
-  
   .card {
     margin-bottom: 1rem;
   }
 }
 
-/* 平面化设计元素 */
-.shadow-sm {
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
-}
-
-.shadow {
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-}
-
-/* 过渡动画 */
-.transition-all {
-  transition: all 0.3s ease;
-}
-
-/* 修复容器宽度问题 */
+/* ===== 修复容器宽度 ===== */
 .container-fluid {
   max-width: 100%;
   padding-left: 0;
@@ -224,61 +245,107 @@ h1, h2, h3, h4, h5, h6 {
   margin-right: 0;
 }
 
-/* 毛玻璃效果支持 */
-@supports ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
-  .glass-effect {
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
-  }
-  
-  .glass-effect-strong {
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-  }
-  
-  /* 所有使用液态玻璃效果的组件 */
-  .glass-header,
-  .glass-sidebar,
-  .glass-footer,
-  .glass-card,
-  .liquid-glass-card,
-  .glass-btn,
-  .liquid-glass-btn,
-  .glass-search,
-  .search-box,
-  .explore-btn,
-  .submit-btn,
-  .glass-input-group .btn,
-  .tag-badge {
-    -webkit-backdrop-filter: blur(15px);
-    backdrop-filter: blur(15px);
-  }
+/* ===== 毛玻璃效果辅助类 ===== */
+.glass-effect {
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
 }
 
-/* 兼容不支持backdrop-filter的浏览器 */
-@supports not ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
-  .glass-effect {
-    background-color: rgba(255, 255, 255, 0.9);
-  }
-  
-  .glass-effect-strong {
-    background-color: rgba(255, 255, 255, 0.95);
-  }
-  
-  /* 所有使用液态玻璃效果的组件在不支持backdrop-filter时的降级样式 */
-  .glass-header,
-  .glass-sidebar,
-  .glass-footer,
-  .glass-card,
-  .liquid-glass-card,
-  .glass-btn,
-  .liquid-glass-btn,
-  .glass-search,
-  .search-box,
-  .explore-btn,
-  .submit-btn,
-  .glass-input-group .btn,
-  .tag-badge {
-    background-color: rgba(255, 255, 255, 0.7) !important;
-  }
+.glass-effect-strong {
+  -webkit-backdrop-filter: blur(25px);
+  backdrop-filter: blur(25px);
+}
+
+/* ===================================================
+   毛玻璃描边 —— 标准 Glassmorphism 实现
+   1px 半透明白边 + 顶部 1px 渐变高光线
+   =================================================== */
+
+.liquid-glass-card,
+.glass-card,
+.feature-card,
+.stat-item,
+.contact-card,
+.friend-card,
+.meme-card,
+.eg-section-inner {
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+/* 浅色模式下描边用深色 */
+html[data-theme="light"] .liquid-glass-card,
+html[data-theme="light"] .glass-card,
+html[data-theme="light"] .feature-card,
+html[data-theme="light"] .stat-item,
+html[data-theme="light"] .contact-card,
+html[data-theme="light"] .friend-card,
+html[data-theme="light"] .meme-card,
+html[data-theme="light"] .eg-section-inner {
+  border: 1px solid rgba(0, 0, 0, 0.10) !important;
+  box-shadow:
+    0 8px 32px rgba(31, 38, 135, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.80),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.04);
+}
+
+/* 顶部 1px 渐变高光线（中间亮、两端透明） */
+.liquid-glass-card::before,
+.glass-card::before,
+.feature-card::before,
+.stat-item::before,
+.contact-card::before,
+.friend-card::before,
+.meme-card::before,
+.eg-section-inner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.55) 30%,
+    rgba(255, 255, 255, 0.55) 70%,
+    transparent
+  );
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 0;
+}
+
+/* hover 时描边略微增强 */
+.liquid-glass-card:hover,
+.glass-card:hover,
+.feature-card:hover,
+.stat-item:hover,
+.contact-card:hover,
+.friend-card:hover,
+.meme-card:hover {
+  border-color: rgba(255, 255, 255, 0.32) !important;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.60),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.10);
+}
+
+html[data-theme="light"] .liquid-glass-card:hover,
+html[data-theme="light"] .glass-card:hover,
+html[data-theme="light"] .feature-card:hover,
+html[data-theme="light"] .stat-item:hover,
+html[data-theme="light"] .contact-card:hover,
+html[data-theme="light"] .friend-card:hover,
+html[data-theme="light"] .meme-card:hover {
+  border-color: rgba(0, 0, 0, 0.18) !important;
+  box-shadow:
+    0 16px 40px rgba(31, 38, 135, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.06);
 }

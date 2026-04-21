@@ -43,11 +43,11 @@ export default {
   name: 'Friends',
   head() {
     return {
-      title: '友情链接 - 何意味.com',
+      title: '友情链接 - 何意味',
       meta: [
-        { name: 'description', content: '何意味.com的友情链接，推荐优秀的合作伙伴网站。' },
-        { property: 'og:title', content: '友情链接 - 何意味.com' },
-        { property: 'og:description', content: '何意味.com推荐的优秀合作伙伴网站。' },
+        { name: 'description', content: '何意味的友情链接，推荐优秀的合作伙伴网站。' },
+        { property: 'og:title', content: '友情链接 - 何意味' },
+        { property: 'og:description', content: '何意味推荐的优秀合作伙伴网站。' },
         { property: 'og:url', content: 'https://xn--vqqq8jxym.com/friends' }
       ]
     }
@@ -147,32 +147,14 @@ export default {
   background: rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 20px 24px;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.2),
-    inset 0 2px 8px rgba(255, 255, 255, 0.05),
-    inset 0 -2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;
   text-decoration: none;
   color: inherit;
-  position: relative;
   overflow: hidden;
-}
-
-.friend-card::before {
-  content: '';
-  position: absolute;
-  top: -10px;
-  left: -10px;
-  right: -10px;
-  bottom: -10px;
-  background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.01));
-  z-index: -1;
-  border-radius: 26px;
-  transition: all 0.4s ease;
+  position: relative;
 }
 
 .friend-card:hover {
@@ -181,13 +163,6 @@ export default {
     0 16px 40px rgba(0, 0, 0, 0.35),
     inset 0 2px 12px rgba(255, 255, 255, 0.08),
     inset 0 -2px 12px rgba(0, 0, 0, 0.15);
-}
-
-.friend-card:hover::before {
-  top: -16px;
-  left: -16px;
-  right: -16px;
-  bottom: -16px;
 }
 
 .friend-card:hover .friend-card-arrow {
@@ -292,3 +267,4 @@ export default {
   }
 }
 </style>
+

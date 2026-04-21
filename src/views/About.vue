@@ -18,7 +18,7 @@
           <div class="about-mission-body">
             <div class="about-mission-text">
               <p class="about-lead">
-                何意味.com 致力于收集、整理和传播中国互联网上的各类热门梗、流行语和网络文化现象。
+                何意味 致力于收集、整理和传播中国互联网上的各类热门梗、流行语和网络文化现象。
               </p>
               <p>
                 我们相信，每一个网络热梗都是时代文化的缩影，承载着特定时期人们的情感、态度和集体记忆。通过建立全面、准确、及时的热梗数据库，我们希望帮助用户更好地理解当代网络文化，促进不同年龄层、不同背景人群之间的沟通与理解。
@@ -147,11 +147,11 @@ export default {
   name: 'About',
   head() {
     return {
-      title: '关于网站 - 何意味.com',
+      title: '关于网站 - 何意味',
       meta: [
-        { name: 'description', content: '何意味.com致力于收集、整理和传播中国互联网上的各类热门梗、流行语和网络文化现象。涵盖收录、实时更新、社区参与等特色功能。' },
-        { property: 'og:title', content: '关于网站 - 何意味.com' },
-        { property: 'og:description', content: '了解何意味.com的使命与特色，共同建设网络热梗百科。' },
+        { name: 'description', content: '何意味致力于收集、整理和传播中国互联网上的各类热门梗、流行语和网络文化现象。涵盖收录、实时更新、社区参与等特色功能。' },
+        { property: 'og:title', content: '关于网站 - 何意味' },
+        { property: 'og:description', content: '了解何意味的使命与特色，共同建设网络热梗百科。' },
         { property: 'og:url', content: 'https://xn--vqqq8jxym.com/about' }
       ]
     }
@@ -282,14 +282,11 @@ export default {
   background: rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 20px 24px;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.2),
-    inset 0 2px 8px rgba(255, 255, 255, 0.05),
-    inset 0 -2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  position: relative;
 }
 
 .stat-item:hover {
@@ -324,29 +321,11 @@ export default {
   background: rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
   padding: 32px 24px;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.2),
-    inset 0 2px 8px rgba(255, 255, 255, 0.05),
-    inset 0 -2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  position: relative;
   overflow: hidden;
-}
-
-.feature-card::before {
-  content: '';
-  position: absolute;
-  top: -10px;
-  left: -10px;
-  right: -10px;
-  bottom: -10px;
-  background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.01));
-  z-index: -1;
-  border-radius: 30px;
-  transition: all 0.4s ease;
+  position: relative;
 }
 
 .feature-card:hover {
@@ -355,13 +334,6 @@ export default {
     0 20px 50px rgba(0, 0, 0, 0.4),
     inset 0 2px 15px rgba(255, 255, 255, 0.08),
     inset 0 -2px 15px rgba(0, 0, 0, 0.15);
-}
-
-.feature-card:hover::before {
-  top: -18px;
-  left: -18px;
-  right: -18px;
-  bottom: -18px;
 }
 
 .feature-card-icon {
@@ -411,32 +383,14 @@ export default {
   background: rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 20px 24px;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.2),
-    inset 0 2px 8px rgba(255, 255, 255, 0.05),
-    inset 0 -2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;
   text-decoration: none;
   color: inherit;
-  position: relative;
   overflow: hidden;
-}
-
-.contact-card::before {
-  content: '';
-  position: absolute;
-  top: -10px;
-  left: -10px;
-  right: -10px;
-  bottom: -10px;
-  background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.01));
-  z-index: -1;
-  border-radius: 26px;
-  transition: all 0.4s ease;
+  position: relative;
 }
 
 .contact-card:hover {
@@ -445,13 +399,6 @@ export default {
     0 16px 40px rgba(0, 0, 0, 0.35),
     inset 0 2px 12px rgba(255, 255, 255, 0.08),
     inset 0 -2px 12px rgba(0, 0, 0, 0.15);
-}
-
-.contact-card:hover::before {
-  top: -16px;
-  left: -16px;
-  right: -16px;
-  bottom: -16px;
 }
 
 .contact-card:hover .contact-card-arrow {
@@ -584,3 +531,4 @@ export default {
   }
 }
 </style>
+

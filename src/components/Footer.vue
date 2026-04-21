@@ -3,7 +3,7 @@
     <div class="container-fluid px-4 px-md-5">
       <div class="row">
         <div class="col-12 col-md-4 mb-4 mb-md-0">
-          <h3 class="h5 fw-bold text-white">何意味.com</h3>
+          <h3 class="h5 fw-bold text-white">何意味</h3>
           <p class="text-white-50">
             记录和分享最新的网络热词和流行文化，帮助大家更好地理解和融入当代网络环境。
           </p>
@@ -48,7 +48,7 @@
       <div class="row align-items-center">
         <div class="col-12 text-center">
           <p class="mb-0 text-white-50">
-            &copy; 2025 - 2026 何意味.com. 保留所有权利. 
+            &copy; 2025 - 2026 何意味. 保留所有权利. 
             <span class="mx-2">|</span>
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-white-50">
               闽ICP备2025115232号-2
@@ -182,7 +182,6 @@ footer {
     max-width: 100%;
   }
   
-  /* 在小屏幕上垂直堆叠列 */
   .row > div {
     margin-bottom: 1.5rem;
   }
@@ -191,7 +190,6 @@ footer {
     margin-bottom: 0;
   }
   
-  /* 调整版权信息在小屏幕上的显示 */
   .row.align-items-center .text-white-50 {
     display: flex;
     flex-direction: column;
@@ -203,12 +201,10 @@ footer {
     display: none;
   }
   
-  /* 移动端列表项样式 */
   .list-unstyled li {
     padding: 0.25rem 0;
   }
   
-  /* 确保在小屏幕上标题有合适的间距 */
   .h6.fw-bold {
     margin-bottom: 0.75rem !important;
   }
@@ -223,4 +219,5 @@ footer {
     font-size: 0.875rem;
   }
 }
+
 </style>
