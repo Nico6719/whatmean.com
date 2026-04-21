@@ -1,5 +1,5 @@
 <template>
-  <header class="glass-header" :class="{ 'scrolled': scrolled && !isHome }">
+  <header class="glass-header" :class="{ 'scrolled': scrolled && !isHome, 'menu-open': mobileMenuOpen }">
     <div class="container-fluid px-4 px-md-5">
       <div class="d-flex justify-content-between align-items-center">
         <h1 class="h4 mb-0">
@@ -27,31 +27,41 @@
           <button 
             class="navbar-toggler border-0 d-md-none" 
             type="button" 
+            :aria-expanded="mobileMenuOpen ? 'true' : 'false'"
+            aria-label="切换导航菜单"
             @click="toggleMobileMenu"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+            <!-- 汉堡图标 -->
+            <svg v-if="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
               <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+            </svg>
+            <!-- X 关闭图标 -->
+            <svg v-else xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+              <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
             </svg>
           </button>
         </div>
       </div>
       
-      <div class="collapse d-md-none mt-2" :class="{ show: mobileMenuOpen }" id="navbarNav">
-        <ul class="nav flex-column">
-          <li class="nav-item">
-            <router-link class="nav-link" to="/" @click="closeMobileMenu">首页</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" to="/entries" @click="closeMobileMenu">词条</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" to="/about" @click="closeMobileMenu">关于</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" to="/friends" @click="closeMobileMenu">友情链接</router-link>
-          </li>
-        </ul>
-      </div>
+      <!-- 移动端菜单：用 Transition 实现展开/收起动画 -->
+      <Transition name="mobile-menu-drop">
+        <div v-if="mobileMenuOpen" class="d-md-none mt-2" id="navbarNav">
+          <ul class="nav flex-column mobile-nav-list">
+            <li class="nav-item">
+              <router-link class="nav-link mobile-nav-link" to="/" @click="closeMobileMenu">首页</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link class="nav-link mobile-nav-link" to="/entries" @click="closeMobileMenu">词条</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link class="nav-link mobile-nav-link" to="/about" @click="closeMobileMenu">关于</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link class="nav-link mobile-nav-link" to="/friends" @click="closeMobileMenu">友情链接</router-link>
+            </li>
+          </ul>
+        </div>
+      </Transition>
     </div>
   </header>
 </template>
@@ -130,6 +140,15 @@ export default {
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
 }
 
+/* 菜单展开时也加毛玻璃背景 */
+.glass-header.menu-open {
+  background: rgba(15, 25, 50, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
+}
+
 /* 品牌名颜色 */
 .brand-link {
   color: #fff;
@@ -171,6 +190,54 @@ export default {
 
 .navbar-toggler:focus {
   box-shadow: none;
+}
+
+/* ===== 移动端菜单项 ===== */
+.mobile-nav-list {
+  gap: 0;
+  padding-bottom: 0.5rem;
+}
+
+.mobile-nav-link {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  padding: 0.8rem 0.5rem !important;
+  background: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+  font-weight: 500;
+}
+
+.mobile-nav-link:hover {
+  background: none !important;
+  transform: none !important;
+}
+
+/* 当前激活页面 —— 仅加粗，不加背景 */
+.mobile-nav-link.router-link-exact-active {
+  background: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+  font-weight: 700;
+}
+
+/* ===== 展开/收起动画 ===== */
+.mobile-menu-drop-enter-active,
+.mobile-menu-drop-leave-active {
+  transition: max-height 0.3s ease, opacity 0.25s ease;
+  overflow: hidden;
+}
+
+.mobile-menu-drop-enter-from,
+.mobile-menu-drop-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+
+.mobile-menu-drop-enter-to,
+.mobile-menu-drop-leave-from {
+  max-height: 280px;
+  opacity: 1;
 }
 
 @media (max-width: 768px) {

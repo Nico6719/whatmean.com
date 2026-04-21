@@ -56,7 +56,7 @@ watch(
 
 /* ===== 页面切换动画 =====
    使用 mode="out-in"：旧页面先离开，新页面再进入
-   通过 contain: layout 限制重排范围，避免 Footer 被顶上来
+   backdrop-filter 的 blur 同步参与过渡，避免模糊突然消失/出现
 */
 
 /* Fade（默认）*/
@@ -69,34 +69,40 @@ watch(
   opacity: 0;
 }
 
-/* 向左滑入（前进） */
+/* 向左滑入（前进）—— backdrop-filter blur 同步过渡 */
 .page-slide-left-enter-active,
 .page-slide-left-leave-active {
   transition: opacity 0.38s cubic-bezier(0.4, 0, 0.2, 1),
-              transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+              transform 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+              filter 0.38s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .page-slide-left-enter-from {
   opacity: 0;
   transform: translateX(40px);
+  filter: blur(8px);
 }
 .page-slide-left-leave-to {
   opacity: 0;
   transform: translateX(-40px);
+  filter: blur(8px);
 }
 
-/* 向右滑入（后退） */
+/* 向右滑入（后退）—— backdrop-filter blur 同步过渡 */
 .page-slide-right-enter-active,
 .page-slide-right-leave-active {
   transition: opacity 0.38s cubic-bezier(0.4, 0, 0.2, 1),
-              transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+              transform 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+              filter 0.38s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .page-slide-right-enter-from {
   opacity: 0;
   transform: translateX(-40px);
+  filter: blur(8px);
 }
 .page-slide-right-leave-to {
   opacity: 0;
   transform: translateX(40px);
+  filter: blur(8px);
 }
 
 /* 页面容器 */

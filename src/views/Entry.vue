@@ -131,6 +131,16 @@ const showEntryDetail = (entry, event) => {
   // 获取点击按钮的位置信息
   const button = event.target.closest('.liquid-glass-btn');
   if (button) {
+    // 临时重置父卡片的 hover transform，避免 getBoundingClientRect 返回偏移后的坐标
+    const card = button.closest('.liquid-glass-card');
+    let origTransform = '';
+    if (card) {
+      origTransform = card.style.transform;
+      card.style.transition = 'none';
+      card.style.transform = 'none';
+      // 强制浏览器重排以应用重置
+      card.getBoundingClientRect();
+    }
     const rect = button.getBoundingClientRect();
     buttonPosition.value = {
       x: rect.left + rect.width / 2,
@@ -138,6 +148,11 @@ const showEntryDetail = (entry, event) => {
       width: rect.width,
       height: rect.height
     };
+    // 恢复卡片原始样式
+    if (card) {
+      card.style.transform = origTransform;
+      card.style.transition = '';
+    }
   }
   selectedEntry.value = entry;
   showModal.value = true;
