@@ -76,6 +76,14 @@ html:not([data-theme]) {
 
 
 /* ===== 基础样式 ===== */
+
+/* 预留滚动条空间，防止模态框打开/关闭时页面宽度跳动（滚动抽搐根本修复）
+   注意：scrollbar-gutter 必须加在实际滚动容器（body）上，
+   且要求 overflow 不为 hidden，故将 overflow-x 改为 clip */
+html {
+  scrollbar-gutter: stable;
+}
+
 a {
   font-weight: 500;
   color: var(--primary-color);
@@ -89,7 +97,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow-x: clip;   /* clip 裁剪横向溢出但不创建滚动容器，不影响 scrollbar-gutter */
+  scrollbar-gutter: stable; /* 预留纵向滚动条空间，防止模态框开关时页面宽度跳动 */
   color: var(--text-color);
   background-color: var(--background-color);
   /* 背景图设在 body 上，是 backdrop-filter 能正确模糊的关键 */

@@ -135,12 +135,11 @@ export default {
     },
 
     lockBodyScroll() {
-      this.bodyOverflow = document.body.style.overflow
-      document.body.style.overflow = 'hidden'
+      // 不锁定 body 滚动，避免滚动条消失导致页面宽度跳动（抽搐）
     },
 
     unlockBodyScroll() {
-      document.body.style.overflow = this.bodyOverflow || ''
+      // 对应 lockBodyScroll，无需恢复
     },
 
     getButtonRect() {
