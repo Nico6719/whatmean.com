@@ -86,11 +86,13 @@
       </div>
   
   <!-- 词条详情模态框 -->
-  <MorphModal 
-    :is-visible="showModal" 
+  <MorphModal
+    :is-visible="showModal"
     :entry="selectedEntry"
-    :button-position="buttonPosition"
-    @close="showModal = false"
+    :card-rect="cardRect"
+    :active-card-el="activeCardEl"
+    @close="handleModalClose"
+    @card-reveal="handleCardReveal"
   />
   <!-- 添加额外的间距 -->
   <div class="mb-5"></div>
@@ -125,37 +127,97 @@ const originalEntries = ref([]);
 const showModal = ref(false);
 const selectedEntry = ref({});
 
-// 显示词条详情
-const buttonPosition = ref({ x: 0, y: 0, width: 0, height: 0 });
-const showEntryDetail = (entry, event) => {
-  // 获取点击按钮的位置信息
-  const button = event.target.closest('.liquid-glass-btn');
-  if (button) {
-    // 临时重置父卡片的 hover transform，避免 getBoundingClientRect 返回偏移后的坐标
-    const card = button.closest('.liquid-glass-card');
-    let origTransform = '';
-    if (card) {
-      origTransform = card.style.transform;
-      card.style.transition = 'none';
-      card.style.transform = 'none';
-      // 强制浏览器重排以应用重置
-      card.getBoundingClientRect();
-    }
-    const rect = button.getBoundingClientRect();
-    buttonPosition.value = {
-      x: rect.left + rect.width / 2,
-      y: rect.top + rect.height / 2,
-      width: rect.width,
-      height: rect.height
-    };
-    // 恢复卡片原始样式
-    if (card) {
-      card.style.transform = origTransform;
-      card.style.transition = '';
-    }
+// 显示词条详情 —— 记录整张卡片的 DOMRect，并隐藏原卡片
+const cardRect = ref(null);
+const activeCardEl = ref(null);
+const cardTimers = ref([]);  // 追踪所有卡片相关的 timer
+
+// 强制清除指定卡片的所有 inline style，并清除所有待执行的 timer
+const resetCard = (card) => {
+  cardTimers.value.forEach(t => clearTimeout(t));
+  cardTimers.value = [];
+  if (card) {
+    card.style.visibility = '';
+    card.style.opacity = '';
+    card.style.transition = '';
   }
+};
+
+const showEntryDetail = (entry, event) => {
+  const btn = event.target.closest('.liquid-glass-btn');
+  const card = btn ? btn.closest('.liquid-glass-card') : null;
+
+  // 如果上一张卡片还在动画中，强制清除它
+  if (activeCardEl.value && activeCardEl.value !== card) {
+    resetCard(activeCardEl.value);
+    activeCardEl.value = null;
+  }
+
+  if (card) {
+    // 如果点的是同一张卡片，也先清除它的待执行 timer
+    resetCard(card);
+
+    // 临时取消 hover transform，确保 getBoundingClientRect 返回静止坐标
+    card.style.transition = 'none';
+    card.style.transform = 'none';
+    card.getBoundingClientRect(); // 强制重排
+    const rect = card.getBoundingClientRect();
+    cardRect.value = {
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
+      borderRadius: 24
+    };
+    card.style.transform = '';
+    card.style.transition = '';
+
+    // 卡片淡出隐藏
+    activeCardEl.value = card;
+    card.style.transition = 'opacity 0.18s ease';
+    card.style.opacity = '0';
+    const t1 = setTimeout(() => { card.style.visibility = 'hidden'; }, 200);
+    cardTimers.value.push(t1);
+  } else {
+    cardRect.value = null;
+    activeCardEl.value = null;
+  }
+
   selectedEntry.value = entry;
   showModal.value = true;
+};
+
+const handleModalClose = () => {
+  showModal.value = false;
+  // 卡片淡入由 handleCardReveal 处理（MorphModal 收缩到位后再触发）
+};
+
+// MorphModal 收缩到卡片位置后触发，此时卡片淡入覆盖面板
+const handleCardReveal = () => {
+  if (activeCardEl.value) {
+    const card = activeCardEl.value;
+    // 先清除所有待执行 timer，防止旧的 timer 干扰恢复流程
+    cardTimers.value.forEach(t => clearTimeout(t));
+    cardTimers.value = [];
+
+    card.style.visibility = '';
+    card.style.opacity = '0';
+    card.style.transition = 'opacity 0.22s ease, transform 0.3s ease';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        card.style.opacity = '1';
+        const t2 = setTimeout(() => {
+          card.style.opacity = '';
+          const t3 = setTimeout(() => {
+            card.style.transition = '';
+            activeCardEl.value = null;
+          }, 350);
+          cardTimers.value.push(t3);
+        }, 250);
+        cardTimers.value.push(t2);
+      });
+    });
+  }
 };
 
 // 获取所有词条

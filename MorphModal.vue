@@ -186,27 +186,26 @@ export default {
     },
 
     _lockScroll() {
-      /* 不使用 overflow:hidden（会覆盖 CSS 的 scrollbar-gutter:stable，导致右侧抖动）
-         改为通过事件拦截阻止滚动，布局完全不受影响 */
-      document.addEventListener('wheel', this._preventScroll, { passive: false })
-      document.addEventListener('keydown', this._preventKeyScroll)
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = scrollbarWidth + 'px'
+      }
+      document.body.style.overflow = 'hidden'
+      
       if (this._isMobile()) {
+        // 手机端使用更轻量的事件监听，避免 touch-action: none 可能导致的系统级刷新
         window.addEventListener('touchmove', this._preventScroll, { passive: false })
       }
     },
     _unlockScroll() {
-      document.removeEventListener('wheel', this._preventScroll)
-      document.removeEventListener('keydown', this._preventKeyScroll)
+      document.body.style.overflow = ''
+      document.body.style.paddingRight = ''
       if (this._isMobile()) {
         window.removeEventListener('touchmove', this._preventScroll)
       }
     },
     _preventScroll(e) {
       e.preventDefault()
-    },
-    _preventKeyScroll(e) {
-      const scrollKeys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' ']
-      if (scrollKeys.includes(e.key)) e.preventDefault()
     },
 
     async _open() {
@@ -282,10 +281,11 @@ export default {
       this.contentVisible = false
       await this._wait(150)
 
+      const src = this._getCardRect()
+      const dst = this._targetRect()
+      this.overlayActive = false
+
       if (this._isMobile()) {
-        const src = this._getCardRect()
-        const dst = this._targetRect()
-        this.overlayActive = false
         /* 手机端：transform 缩回卡片，border-radius 用补偿值 */
         const { scaleX, scaleY, tx, ty } = this._calcMobileTransform(src, dst)
         const srcRadius = src.radius ?? 24
@@ -324,20 +324,13 @@ export default {
         this.rendered   = false
         this.panelStyle = {}
       } else {
-        /* 桌面端：先解锁滚动，让 scrollbar 复原后再测量卡片的"最终位置"。
-           此时 panel 仍覆盖屏幕，用户无感。
-           这样面板收缩的终点 = 卡片实际出现的位置，消除抽搐。 */
-        this._unlockScroll()
-        await new Promise(r => requestAnimationFrame(r))
-
-        const src = this._getCardRect()
-        this.overlayActive = false
-
+        /* 桌面端：原有 left/top/width/height 收缩 */
         this.panelStyle = {
           ...this._toStyle(src),
           transition: this._morphTransition(0.40)
         }
-        /* 等待时间须 >= transition 时长，否则中途换 transition 会弹跳 */
+        /* 等待时间必须 >= transition 时长，否则切换 transition 属性会
+           打断进行中的 CSS 动画，导致面板"弹跳"到终态（抽搐感） */
         await this._wait(420)
         this.$emit('card-reveal')
         this.panelStyle = {
@@ -346,6 +339,7 @@ export default {
           opacity: '0'
         }
         await this._wait(240)
+        this._unlockScroll()
         this.rendered   = false
         this.panelStyle = {}
       }

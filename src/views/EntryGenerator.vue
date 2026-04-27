@@ -99,24 +99,28 @@
         </div>
       </div>
 
-      <div v-if="generatedJson" class="eg-section">
-        <div class="eg-section-inner">
-          <div class="eg-section-header">
-            <span class="eg-section-number">JSON</span>
-            <h2 class="eg-section-title">生成结果</h2>
-          </div>
-          <pre class="json-preview"><code>{{ generatedJson }}</code></pre>
-          <div class="json-actions">
-            <button class="eg-btn-success" @click="copyToClipboard">
-              复制到剪贴板
-            </button>
-            <a href="https://github.com/Nico6719/whatmean.com" target="_blank" class="eg-btn-outline">
-              前去提交
-            </a>
-            <small class="copied-text" v-if="copied">已复制！</small>
+      <Transition name="result-slide">
+        <div v-if="generatedJson" class="eg-section">
+          <div class="eg-section-inner">
+            <div class="eg-section-header">
+              <span class="eg-section-number">JSON</span>
+              <h2 class="eg-section-title">生成结果</h2>
+            </div>
+            <pre class="json-preview"><code>{{ generatedJson }}</code></pre>
+            <div class="json-actions">
+              <button class="eg-btn-success" @click="copyToClipboard">
+                复制到剪贴板
+              </button>
+              <a href="https://github.com/Nico6719/whatmean.com" target="_blank" class="eg-btn-outline">
+                前去提交
+              </a>
+              <Transition name="copied-fade">
+                <small class="copied-text" v-if="copied">已复制！</small>
+              </Transition>
+            </div>
           </div>
         </div>
-      </div>
+      </Transition>
     </div>
   </div>
 </template>
@@ -453,12 +457,53 @@ export default {
   display: flex;
   gap: 12px;
   align-items: center;
+  flex-wrap: nowrap;
+  position: relative;
+}
+
+.json-actions .eg-btn-success,
+.json-actions .eg-btn-outline {
+  flex: 1;
 }
 
 .copied-text {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
   color: #93c5fd;
-  font-weight: 500;
-  margin-left: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(147, 197, 253, 0.3);
+  pointer-events: none;
+}
+
+.copied-fade-enter-active,
+.copied-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.copied-fade-enter-from,
+.copied-fade-leave-to {
+  opacity: 0;
+}
+
+/* 生成结果区域的淡入上滑动画 */
+.result-slide-enter-active {
+  transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.result-slide-enter-from {
+  opacity: 0;
+  transform: translateY(28px);
+}
+.result-slide-enter-to {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 @keyframes egFadeInDown {

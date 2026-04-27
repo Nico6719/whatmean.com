@@ -11,15 +11,22 @@
     <div class="friends-content">
       <div class="friends-section">
         <div class="friends-grid">
-          <a
+          <div
             class="friend-card"
-            v-for="friend in friends"
+            v-for="(friend, index) in friends"
             :key="friend.name"
-            :href="friend.url"
-            target="_blank"
+            :ref="el => cardRefs[index] = el"
+            @click="showFriendDetail(friend, index)"
           >
             <div class="friend-card-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+              <img
+                v-if="!iconError[index]"
+                :src="getFavicon(friend.url)"
+                :alt="friend.name"
+                class="friend-favicon"
+                @error="iconError[index] = true"
+              />
+              <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M6.354 5.5H4a3 3 0 0 0 0 6h3a3 3 0 0 0 2.83-4H9c-.086 0-.17.01-.25.031A2 2 0 0 1 7 10.5H4a2 2 0 1 1 0-4h1.535c.218-.376.495-.714.82-1z"/>
                 <path d="M9 5.5a3 3 0 0 0-2.83 4h1.098A2 2 0 0 1 9 6.5h3a2 2 0 1 1 0 4h-1.535a4.02 4.02 0 0 1-.82 1H12a3 3 0 1 0 0-6H9z"/>
               </svg>
@@ -31,16 +38,28 @@
             <svg class="friend-card-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
               <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
             </svg>
-          </a>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- 展开面板 -->
+    <FriendModal
+      :isVisible="modalVisible"
+      :friend="activeFriend"
+      :activeCardEl="activeCardEl"
+      @close="handleModalClose"
+      @card-reveal="handleCardReveal"
+    />
   </div>
 </template>
 
 <script>
+import FriendModal from '../components/FriendModal.vue'
+
 export default {
   name: 'Friends',
+  components: { FriendModal },
   head() {
     return {
       title: '友情链接 - 何意味',
@@ -74,8 +93,97 @@ export default {
           name: '梦涵LOVEの小窝',
           description: '一个一个小涵子的小BLOG，一起来分享生活的小确幸吧~',
           url: 'https://heyuhan.huohuo.ink/'
+        },
+        {
+          name: 'sunxiaochuan2231',
+          description: 'sunxiaochuan2231 的个人站点。',
+          url: 'https://jm91comic.asia'
         }
-      ]
+      ],
+      modalVisible: false,
+      activeFriend: null,
+      activeCardEl: null,
+      activeCardIndex: -1,
+      cardRefs: [],
+      cardTimers: [],
+      iconError: {}
+    }
+  },
+  methods: {
+    getFavicon(url) {
+      try {
+        const origin = new URL(url).origin
+        return `${origin}/favicon.ico`
+      } catch {
+        return ''
+      }
+    },
+    /* 强制清除卡片的所有 inline style 和待执行 timer */
+    resetCard(cardEl) {
+      this.cardTimers.forEach(clearTimeout)
+      this.cardTimers = []
+      if (cardEl) {
+        cardEl.style.transition = ''
+        cardEl.style.opacity    = ''
+        cardEl.style.visibility = ''
+        cardEl.style.transform  = ''
+      }
+    },
+
+    showFriendDetail(friend, index) {
+      // 先重置上一张卡片
+      if (this.activeCardEl) {
+        this.resetCard(this.activeCardEl)
+      }
+
+      const card = this.cardRefs[index]
+      if (!card) return
+
+      // 卡片淡出隐藏
+      card.style.transition = 'opacity 0.18s ease'
+      card.style.opacity    = '1'
+      const t1 = setTimeout(() => {
+        card.style.opacity    = '0'
+        const t2 = setTimeout(() => {
+          card.style.visibility = 'hidden'
+        }, 180)
+        this.cardTimers.push(t2)
+      }, 0)
+      this.cardTimers.push(t1)
+
+      this.activeFriend    = friend
+      this.activeCardEl    = card
+      this.activeCardIndex = index
+      this.modalVisible    = true
+    },
+
+    handleModalClose() {
+      this.modalVisible = false
+    },
+
+    handleCardReveal() {
+      const card = this.activeCardEl
+      if (!card) return
+
+      this.cardTimers.forEach(clearTimeout)
+      this.cardTimers = []
+
+      // 先恢复可见但透明
+      card.style.transition  = 'none'
+      card.style.visibility  = 'visible'
+      card.style.opacity     = '0'
+
+      const t1 = setTimeout(() => {
+        card.style.transition = 'opacity 0.22s ease, transform 0.3s ease'
+        card.style.opacity    = '1'
+        const t2 = setTimeout(() => {
+          this.resetCard(card)
+          this.activeCardEl    = null
+          this.activeCardIndex = -1
+        }, 320)
+        this.cardTimers.push(t2)
+      }, 16)
+      this.cardTimers.push(t1)
     }
   }
 }
@@ -147,6 +255,7 @@ export default {
   background: rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 16px;
   padding: 20px 24px;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -155,6 +264,10 @@ export default {
   color: inherit;
   overflow: hidden;
   position: relative;
+  box-shadow:
+    rgba(0, 0, 0, 0.18) 0px 8px 32px 0px,
+    rgba(255, 255, 255, 0.30) 0px 1px 0px 0px inset,
+    rgba(255, 255, 255, 0.05) 0px -1px 0px 0px inset;
 }
 
 .friend-card:hover {
@@ -180,6 +293,14 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+}
+
+.friend-favicon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 6px;
 }
 
 .friend-card-info {
@@ -267,4 +388,3 @@ export default {
   }
 }
 </style>
-
