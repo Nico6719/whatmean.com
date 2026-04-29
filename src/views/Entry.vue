@@ -233,7 +233,6 @@ const handleCardReveal = () => {
   cardTimers.value = [];
 
   // 面板已完全消失，直接恢复卡片可见状态
-  // 强制设置 opacity 和 visibility，并锁定 transform 防止跳动
   card.style.transition = 'none';
   card.style.transform = 'none';
   card.style.opacity = '1';

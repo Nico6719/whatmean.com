@@ -145,7 +145,30 @@ export default {
         const el = card.querySelector(selector);
         if (!el) return {};
         const s = window.getComputedStyle(el);
-        return { fontSize: s.fontSize, padding: s.padding, margin: s.margin, fontWeight: s.fontWeight, color: s.color, width: s.width, height: s.height };
+        return { 
+          fontSize: s.fontSize, 
+          padding: s.padding, 
+          margin: s.margin, 
+          fontWeight: s.fontWeight, 
+          color: s.color, 
+          width: s.width, 
+          height: s.height,
+          lineHeight: s.lineHeight,
+          display: s.display,
+          alignItems: s.alignItems,
+          justifyContent: s.justifyContent
+        };
+      };
+      const getIconStyles = () => {
+        const iconContainer = card.querySelector('.friend-card-icon');
+        const iconImg = card.querySelector('.friend-favicon, svg');
+        if (!iconContainer) return {};
+        const s = window.getComputedStyle(iconContainer);
+        const imgS = iconImg ? window.getComputedStyle(iconImg) : {};
+        return {
+          container: { width: s.width, height: s.height },
+          icon: { width: imgS.width || '24px', height: imgS.height || '24px' }
+        };
       };
       const tagStyles = Array.from(card.querySelectorAll('.tag-badge')).map(tag => {
         const s = window.getComputedStyle(tag);
@@ -164,7 +187,7 @@ export default {
         ...friend, 
         clonedHtml: cardContent,
         deepStyles: {
-          icon: getDeepStyles('.friend-card-icon'),
+          icon: getIconStyles(),
           name: getDeepStyles('.friend-card-name'),
           desc: getDeepStyles('.friend-card-desc'),
           tagStyles: tagStyles

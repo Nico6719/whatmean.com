@@ -153,6 +153,9 @@ export default {
         title.style.setProperty('margin', styles.title.margin, 'important');
         title.style.setProperty('font-weight', styles.title.fontWeight, 'important');
         title.style.setProperty('color', styles.title.color, 'important');
+        // 针对友情链接卡片：如果标题偏下，通常是因为父容器 flex 布局或 margin 导致，这里强制重置
+        title.style.setProperty('display', 'block', 'important');
+        title.style.setProperty('transform', 'none', 'important');
       }
 
       const text = container.querySelector('.card-text');
@@ -167,6 +170,19 @@ export default {
           webkitBoxOrient: 'vertical',
           overflow: 'hidden'
         });
+      }
+
+      // 2.5 针对友情链接 Icon 尺寸修复
+      const iconContainer = container.querySelector('.friend-card-icon');
+      const iconImg = container.querySelector('.friend-favicon, svg');
+      if (iconContainer && styles.icon?.container) {
+        iconContainer.style.setProperty('width', styles.icon.container.width, 'important');
+        iconContainer.style.setProperty('height', styles.icon.container.height, 'important');
+        iconContainer.style.setProperty('min-width', styles.icon.container.width, 'important');
+      }
+      if (iconImg && styles.icon?.icon) {
+        iconImg.style.setProperty('width', styles.icon.icon.width, 'important');
+        iconImg.style.setProperty('height', styles.icon.icon.height, 'important');
       }
 
       // 3. 强制对齐每一个标签的绝对像素尺寸
@@ -263,18 +279,18 @@ export default {
     _lockScroll() {
       document.addEventListener('wheel', this._preventScroll, { passive: false })
       document.addEventListener('keydown', this._preventKeyScroll)
-      if (this._isMobile()) {
-        window.addEventListener('touchmove', this._preventScroll, { passive: false })
-      }
+      // 移动端不再全局拦截 touchmove，否则会导致弹窗内部也无法滚动
     },
     _unlockScroll() {
       document.removeEventListener('wheel', this._preventScroll)
       document.removeEventListener('keydown', this._preventKeyScroll)
-      if (this._isMobile()) {
-        window.removeEventListener('touchmove', this._preventScroll)
+    },
+    _preventScroll(e) {
+      // 仅当事件目标不在弹窗内容区时才拦截滚动
+      if (!e.target.closest('.cex-content')) {
+        e.preventDefault()
       }
     },
-    _preventScroll(e) { e.preventDefault() },
     _preventKeyScroll(e) {
       const scrollKeys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' ']
       if (scrollKeys.includes(e.key)) e.preventDefault()
@@ -284,48 +300,38 @@ export default {
       this._clearTimers()
       this.contentVisible = false
       this.overlayActive  = false
-      this.cardViewStyle  = { opacity: '0', pointerEvents: 'none' } // 重置克隆层，防止快速打断残留
+      this.cardViewStyle  = { opacity: '0', pointerEvents: 'none' }
       this._lockScroll()
 
       const src = this._getCardRect()
       const dst = this._targetRect()
 
       if (this._isMobile()) {
-        const { scaleX, scaleY, tx, ty } = this._calcMobileTransform(src, dst)
-        const srcRadius = src.radius ?? 24
-        const dstRadius = dst.radius ?? 20
-
+        // 手机端：使用布局属性动画，确保内容不被压缩变形
         this.contentStyle = { opacity: '0', transition: 'none' }
         this.panelStyle = {
-          ...this._toStyle(dst),
-          borderRadius: `${srcRadius}px`,
-          transform: `translate(${tx}px, ${ty}px) scale(${scaleX}, ${scaleY})`,
-          transformOrigin: 'center center',
+          ...this._toStyle(src),
           transition: 'none',
-          willChange: 'transform, border-radius',
-          opacity: '1'
+          opacity: '1',
+          willChange: 'left, top, width, height, border-radius'
         }
         this.rendered = true
         await this.$nextTick()
         await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
 
         this.overlayActive = true
+        const dur = 0.45
         this.panelStyle = {
           ...this._toStyle(dst),
-          borderRadius: `${dstRadius}px`,
-          transform: 'translate(0, 0) scale(1, 1)',
-          transformOrigin: 'center center',
-          transition: `transform 0.45s cubic-bezier(0.32,0.72,0,1), border-radius 0.45s cubic-bezier(0.32,0.72,0,1)`,
-          willChange: 'transform, border-radius',
+          transition: this._morphTransition(dur),
           opacity: '1'
         }
         this.contentStyle = {
           opacity: '1',
-          transition: 'opacity 0.35s cubic-bezier(0.32,0.72,0,1)'
+          transition: `opacity ${dur * 0.8}s ease`
         }
         this.contentVisible = true
-        await this._wait(460)
-        this.panelStyle = { ...this.panelStyle, willChange: 'auto' }
+        await this._wait(Math.round(dur * 1000) + 20)
         this.contentStyle = {}
       } else {
         const scaleX0 = src.width  / dst.width
@@ -374,29 +380,27 @@ export default {
       const dst = this._targetRect()
 
       if (this._isMobile()) {
-        // ===== 手机端：与桌面端相同，使用 left/top/width/height 形变收缩回卡片 =====
-        // 避免 scale(scaleX, scaleY) 因宽高比差异导致面板被压扁
+        // 手机端：回归布局属性动画，彻底解决内容压缩变形问题
         const dur = 0.45
 
         this._unlockScroll()
         this.overlayActive = false
 
-        // 详情层淡出，卡片层淡入（交叉淡入）
         this.contentStyle = {
           opacity: '0',
-          transition: `opacity ${dur * 0.5}s cubic-bezier(0.32,0.72,0,1)`
+          transition: `opacity ${dur * 0.4}s ease`
         }
         this.cardViewStyle = {
           opacity: '1',
           pointerEvents: 'none',
-          transition: `opacity ${dur * 0.5}s cubic-bezier(0.32,0.72,0,1)`
+          transition: `opacity ${dur * 0.4}s ease`
         }
 
-        // 面板形变收缩，全程 opacity:1
         this.panelStyle = {
           ...this._toStyle(src),
           transition: this._morphTransition(dur),
-          opacity: '1'
+          opacity: '1',
+          willChange: 'left, top, width, height, border-radius'
         }
 
         await this._wait(Math.round(dur * 1000) + 30)
@@ -506,11 +510,13 @@ export default {
 .cex-content {
   position: absolute;
   inset: 0;
-  z-index: 2; /* 内容层始终在克隆层之上，确保关闭按钮可点击 */
+  z-index: 2;
   overflow-y: auto;
-  padding: 20px 24px 80px;
+  /* 增加底部内边距，配合淡出遮罩，解决按钮遮挡问题 */
+  padding: 20px 24px 120px;
   opacity: 0;
   pointer-events: none;
+  -webkit-overflow-scrolling: touch;
 }
 .cex-content--show {
   opacity: 1;
@@ -637,6 +643,7 @@ export default {
   bottom: 20px;
   right: 24px;
   z-index: 10;
+  pointer-events: auto;
 }
 .cex-footer .liquid-glass-btn {
   background: rgba(255, 255, 255, 0.10);
@@ -661,9 +668,17 @@ export default {
 
 /* ===== 移动端 ===== */
 @media (max-width: 768px) {
-  .cex-content { padding: 20px 20px 30px; }
+  .cex-content { padding: 20px 20px 120px; }
   .cex-title   { font-size: 1.75rem; }
   .cex-desc    { font-size: 1rem; }
+  /* 手机端底部按钮居中显示，更符合操作习惯 */
+  .cex-footer {
+    right: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    bottom: 24px;
+  }
   /* 手机端预览层适配：确保克隆的内容能正确换行 */
   .cex-card-view-inner :deep(.card-body) {
     padding: 1.5rem !important;
@@ -674,7 +689,6 @@ export default {
     margin: 0.5rem 0 !important;
   }
   .cex-card-view-inner :deep(.card-text) {
-    /* 移除硬编码，由 _applyDeepStyles 动态应用原卡片的 fontSize 和 lineHeight */
     color: rgba(255, 255, 255, 0.80) !important;
   }
 }
