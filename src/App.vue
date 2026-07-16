@@ -56,12 +56,20 @@ watch(
 
 /* ===== 页面切换动画 =====
    使用 mode="out-in"：旧页面先离开，新页面再进入
-   注意：不要在 .page-wrapper（祖先元素）上使用 filter。
-   页面内部大量子组件依赖 backdrop-filter 实现毛玻璃效果，
-   而祖先一旦带有 filter，会为其建立新的层叠上下文，
-   导致子元素的 backdrop-filter 无法正确采样到页面背景，
-   毛玻璃效果会在动画期间"消失"，动画结束、filter 恢复为
-   none 后才复原。因此这里只用 opacity + transform 过渡。
+
+   毛玻璃消失问题的真正根因：
+   transform、filter 等属性会让应用它们的元素成为新的层叠上下文根，
+   其子元素的 backdrop-filter 只能在这个根内部采样背景。而背景图是
+   设在 <body> 上的（见 style.css），.page-wrapper 自身没有背景。
+   动画期间 .page-wrapper 带有 transform，子元素的毛玻璃卡片就只能
+   看到隔离层内部空空如也的内容，效果因此在动画期间"消失"，动画
+   结束、transform 归零、隔离解除后才恢复正常。
+   （之前只去掉了 filter: blur，但 transform 同样会触发隔离，
+   所以问题并未真正解决。）
+
+   修复思路：不放弃 transform（避免用 left/margin 做动画导致重排、
+   性能变差），而是给 .page-wrapper 补一份背景（见下方 ::before），
+   让隔离层内部本身就有内容可供毛玻璃采样。
 */
 
 /* Fade（默认）*/
@@ -107,5 +115,23 @@ watch(
 /* 页面容器 */
 .page-wrapper {
   /* 移除 contain: layout，因为它会创建一个新的包含块，导致子元素的 fixed 定位相对于该容器而非视口 */
+  position: relative;
+}
+
+/* 补一份与 body 一致的背景，垫在页面内容之下。
+   平时（无 transform 时）与 body 背景完全重叠，肉眼看不出差异；
+   动画期间 .page-wrapper 成为层叠上下文根时，
+   子元素的 backdrop-filter 就能在这个根内部采样到这份背景，
+   而不是看到空白，从而在动画全程保持毛玻璃效果不消失。 */
+.page-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 </style>
