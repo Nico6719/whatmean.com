@@ -7,7 +7,7 @@ import Footer from './components/Footer.vue'
 const route = useRoute()
 const transitionName = ref('page-fade')
 
-const routeOrder = ['/', '/entries', '/entry-generator', '/about', '/friends']
+const routeOrder = ['/', '/entries', '/entry-generator', '/about', '/friends', '/freebies']
 
 watch(
   () => route.path,
