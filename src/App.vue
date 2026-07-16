@@ -56,7 +56,12 @@ watch(
 
 /* ===== 页面切换动画 =====
    使用 mode="out-in"：旧页面先离开，新页面再进入
-   backdrop-filter 的 blur 同步参与过渡，避免模糊突然消失/出现
+   注意：不要在 .page-wrapper（祖先元素）上使用 filter。
+   页面内部大量子组件依赖 backdrop-filter 实现毛玻璃效果，
+   而祖先一旦带有 filter，会为其建立新的层叠上下文，
+   导致子元素的 backdrop-filter 无法正确采样到页面背景，
+   毛玻璃效果会在动画期间"消失"，动画结束、filter 恢复为
+   none 后才复原。因此这里只用 opacity + transform 过渡。
 */
 
 /* Fade（默认）*/
@@ -69,40 +74,34 @@ watch(
   opacity: 0;
 }
 
-/* 向左滑入（前进）—— backdrop-filter blur 同步过渡 */
+/* 向左滑入（前进）*/
 .page-slide-left-enter-active,
 .page-slide-left-leave-active {
   transition: opacity 0.38s cubic-bezier(0.4, 0, 0.2, 1),
-              transform 0.38s cubic-bezier(0.4, 0, 0.2, 1),
-              filter 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+              transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .page-slide-left-enter-from {
   opacity: 0;
   transform: translateX(40px);
-  filter: blur(8px);
 }
 .page-slide-left-leave-to {
   opacity: 0;
   transform: translateX(-40px);
-  filter: blur(8px);
 }
 
-/* 向右滑入（后退）—— backdrop-filter blur 同步过渡 */
+/* 向右滑入（后退）*/
 .page-slide-right-enter-active,
 .page-slide-right-leave-active {
   transition: opacity 0.38s cubic-bezier(0.4, 0, 0.2, 1),
-              transform 0.38s cubic-bezier(0.4, 0, 0.2, 1),
-              filter 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+              transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .page-slide-right-enter-from {
   opacity: 0;
   transform: translateX(-40px);
-  filter: blur(8px);
 }
 .page-slide-right-leave-to {
   opacity: 0;
   transform: translateX(40px);
-  filter: blur(8px);
 }
 
 /* 页面容器 */
