@@ -118,8 +118,8 @@
           </div>
           <!-- 模拟文字区 -->
           <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; text-align: left;">
-            <div :style="{ fontSize: _isMobile() ? '0.95rem' : '1rem', fontWeight: 700, color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.2 }">{{ friend?.name }}</div>
-            <div :style="{ fontSize: _isMobile() ? '0.8rem' : '0.85rem', color: 'rgba(255, 255, 255, 0.55)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.2 }">{{ friend?.description }}</div>
+            <div :style="{ fontSize: _isMobile() ? '0.95rem' : '1rem', fontWeight: 700, color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.3 }">{{ friend?.name }}</div>
+            <div :style="{ fontSize: _isMobile() ? '0.8rem' : '0.85rem', color: 'rgba(255, 255, 255, 0.55)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.5 }">{{ friend?.description }}</div>
           </div>
           <!-- 模拟箭头 -->
           <svg style="color: rgba(255, 255, 255, 0.3); min-width: 16px; margin-left: 8px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -317,7 +317,9 @@ export default {
         window.removeEventListener('touchmove', this._preventScroll)
       }
     },
-    _preventScroll(e) { e.preventDefault() },
+    _preventScroll(e) {
+      if (!e.target.closest('.fm-content')) e.preventDefault()
+    },
     _preventKeyScroll(e) {
       const scrollKeys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' ']
       if (scrollKeys.includes(e.key)) e.preventDefault()
@@ -513,11 +515,11 @@ export default {
   position: fixed;
   z-index: 3000;
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.30);
+  background: rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   /* 阴影与全局 style.css 中 .friend-card 严格一致 */
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.30),

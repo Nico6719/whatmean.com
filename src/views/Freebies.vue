@@ -11,13 +11,12 @@
     <div class="freebies-content">
       <div class="freebies-section">
         <div class="freebies-grid">
-          <a
+        <div
             class="freebie-card"
             v-for="(freebie, index) in freebies"
             :key="freebie.name"
-            :href="freebie.url"
-            target="_blank"
-            rel="noopener noreferrer"
+            :ref="el => cardRefs[index] = el"
+            @click="showFreebieDetail(freebie, index)"
           >
             <div class="freebie-card-icon">
               <img
@@ -41,19 +40,36 @@
             <svg class="freebie-card-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
               <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
             </svg>
-          </a>
+          </div>
         </div>
       </div>
     </div>
+
+    <FreebieModal
+      :isVisible="modalVisible"
+      :freebie="activeFreebie"
+      :activeCardEl="activeCardEl"
+      @close="handleModalClose"
+      @card-reveal="handleCardReveal"
+    />
   </div>
 </template>
 
 <script>
+import FreebieModal from '../components/FreebieModal.vue'
+
 export default {
   name: 'Freebies',
+  components: { FreebieModal },
   data() {
     return {
       iconError: {},
+      modalVisible: false,
+      activeFreebie: null,
+      activeCardEl: null,
+      activeCardIndex: -1,
+      cardRefs: [],
+      cardTimers: [],
       freebies: [
         {
           name: 'Cloudflare',
@@ -204,6 +220,60 @@ export default {
       } catch {
         return ''
       }
+    },
+
+    resetCard(cardEl) {
+      this.cardTimers.forEach(clearTimeout)
+      this.cardTimers = []
+      if (cardEl) {
+        cardEl.style.transition = ''
+        cardEl.style.opacity    = ''
+        cardEl.style.visibility = ''
+        cardEl.style.transform  = ''
+      }
+    },
+
+    showFreebieDetail(freebie, index) {
+      if (this.activeCardEl) this.resetCard(this.activeCardEl)
+      const card = this.cardRefs[index]
+      if (!card) return
+
+      card.style.transition = 'opacity 0.2s ease'
+      card.style.opacity = '0'
+      const t1 = setTimeout(() => {
+        if (this.activeCardEl === card) card.style.visibility = 'hidden'
+      }, 210)
+      this.cardTimers.push(t1)
+
+      this.activeFreebie   = { ...freebie }
+      this.activeCardEl    = card
+      this.activeCardIndex = index
+      this.modalVisible    = true
+    },
+
+    handleModalClose() {
+      this.modalVisible = false
+    },
+
+    handleCardReveal() {
+      if (!this.activeCardEl) return
+      const card = this.activeCardEl
+      this.cardTimers.forEach(clearTimeout)
+      this.cardTimers = []
+
+      card.style.transition = 'none'
+      card.style.transform  = 'none'
+      card.style.opacity    = '1'
+      card.style.visibility = 'visible'
+      card.offsetHeight
+
+      card.style.transform  = ''
+      card.style.opacity    = ''
+      card.style.visibility = ''
+      card.offsetHeight
+
+      card.style.transition = ''
+      this.activeCardEl = null
     }
   }
 }
@@ -335,6 +405,7 @@ export default {
   font-weight: 700;
   color: #ffffff;
   margin: 0;
+  line-height: 1.3;
 }
 
 .freebie-card-desc {

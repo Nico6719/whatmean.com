@@ -207,24 +207,28 @@ export default {
       this.cardTimers.forEach(clearTimeout)
       this.cardTimers = []
 
-      // 强制设置可见性并锁定状态防止跳动
+      // 1. 先用 transition:none 锁住，让卡片重新可见
       card.style.transition = 'none'
       card.style.transform = 'none'
       card.style.opacity = '1'
       card.style.visibility = 'visible'
 
-      // 强制重绘
+      // 2. 强制重绘，确保上方样式已生效
       card.offsetHeight
 
-      // 稍延迟后清理 inline style
-      const t = setTimeout(() => {
-        card.style.transition = ''
-        card.style.transform = ''
-        card.style.opacity = ''
-        card.style.visibility = ''
-        this.activeCardEl = null
-      }, 30)
-      this.cardTimers.push(t)
+      // 3. 在 transition 仍为 none 时，清除其余 inline style
+      //    此时不会触发任何 CSS transition 动画
+      card.style.transform = ''
+      card.style.opacity = ''
+      card.style.visibility = ''
+
+      // 4. 再次强制重绘，让浏览器确认最终值
+      card.offsetHeight
+
+      // 5. 最后才恢复 CSS transition：此时各属性已处于最终态，
+      //    不存在"从 none 跳到 hover 值"的过渡，标题文字不再抽搐
+      card.style.transition = ''
+      this.activeCardEl = null
     }
   }
 }
@@ -356,6 +360,7 @@ export default {
   font-weight: 700;
   color: #ffffff;
   margin: 0;
+  line-height: 1.3;
 }
 
 .friend-card-desc {
