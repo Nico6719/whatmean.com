@@ -62,7 +62,7 @@
 
         <div class="fbm-section">
           <h3 class="fbm-section-label">网站地址</h3>
-          <p class="fbm-url">{{ freebie?.url || '' }}</p>
+          <p class="fbm-url">{{ displayUrl }}</p>
         </div>
 
         <!-- 访问按钮 -->
@@ -168,6 +168,12 @@ export default {
       cardViewStyle:  { opacity: '0', pointerEvents: 'none' },
       _timers:        [],
       faviconError:   false
+    }
+  },
+  computed: {
+    // 展示用地址：条目可用 displayUrl 覆盖，用于隐去链接上的参数
+    displayUrl() {
+      return this.freebie?.displayUrl || this.freebie?.url || ''
     }
   },
   watch: {

@@ -72,6 +72,13 @@ export default {
       cardTimers: [],
       freebies: [
         {
+          name: '雨云',
+          description: '国内云服务商，提供云服务器、游戏云和物理服务器，价格便宜，还有推广返利。',
+          url: 'https://www.rainyun.com/Nico6719_',
+          displayUrl: 'https://www.rainyun.com',
+          tags: ['云服务器', '游戏云', '低价']
+        },
+        {
           name: 'Cloudflare',
           description: '全球领先的 CDN、DNS 和网络安全服务，提供免费套餐。',
           url: 'https://cloudflare.com',
