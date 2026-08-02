@@ -4,8 +4,10 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div></div>
         <div class="search-slot" ref="slotEl" :style="slotStyle">
+          <!-- 不要加 w-100：那是 width:100%!important，会盖掉停靠时的内联宽度
+               和 FLIP 的宽度动画。.input-group 自带 width:100%，无需补 -->
           <div
-            class="input-group w-100 w-md-auto"
+            class="input-group"
             ref="searchBoxEl"
             :class="{ 'is-docked': docked }"
             :style="[morphInFlight ? { visibility: 'hidden' } : null, dockedStyle]"
@@ -98,7 +100,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, onBeforeRouteLeave } from 'vue-router';
 import { useHead } from '@unhead/vue';
 import entriesApi from '../services/api';
 import MorphModal from '../components/MorphModal.vue';
@@ -107,6 +109,9 @@ import {
   docked,
   dockAnchor,
   resetDock,
+  flyDockOut,
+  flyDockIn,
+  cancelDockFlight,
   DOCK_WIDTH,
   DOCK_DURATION,
   DOCK_EASING
@@ -140,10 +145,10 @@ const searchBoxEl = ref(null);
 
 /* ===== 滚动停靠 =====
    搜索框快被固定 Header 盖住时，改为 fixed 贴进 Header 的槽位。
-   一对上下阈值构成滞回区，避免临界点反复开合抖动。 */
-const DOCK_ON = 72;
-const DOCK_OFF = 92;
 
+   停靠与复位共用一条基准线：Header 实测下边缘。不引入经验常数，
+   免得基准线加上偏移后越过"页面顶部时的静止位置"，
+   复位条件永远判不成立，搜索框卡在停靠态下不来。 */
 const slotEl = ref(null);
 // 停靠后搜索框脱离文档流，用它把原位的高度撑住，防止内容跳动
 const lockedHeight = ref(0);
@@ -170,12 +175,57 @@ const canAnimate = () =>
   typeof Element.prototype.animate === 'function' &&
   !(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false);
 
+/**
+ * 本页的进入/离开过渡是否还在跑
+ *
+ * 直接量 .page-wrapper 的两个属性，因为 FLIP 在过渡期间失效的原因正是这两个：
+ * - transform 非 none：按规范 fixed 的包含块从视口变成这个祖先，停靠坐标失准
+ * - opacity < 1：动画整段埋在淡入底下，看得见时已经跑完
+ *
+ * 比"挂载后第一次判定"或计时器窗口可靠：不假设接口多快、滚动恢复在哪一帧，
+ * 问的就是"此刻这两个坑在不在"。
+ */
+const pageTransitionActive = () => {
+  const wrapper = slotEl.value?.closest('.page-wrapper');
+  if (!wrapper) return false;
+  const s = window.getComputedStyle(wrapper);
+  return s.transform !== 'none' || parseFloat(s.opacity) < 1;
+};
+
 // FLIP：先记起点，切状态，再从起点动画到新位置
-const setDocked = async (next) => {
+const setDocked = async (next, entering = false) => {
   const el = searchBoxEl.value;
   if (!el || docked.value === next) return;
 
   if (!lockedHeight.value) lockedHeight.value = el.offsetHeight;
+
+  // 入场即停靠：没有"原位"可作为 FLIP 起点（页面刚出现，用户没见过它在
+  // 页面里的样子），而且真实元素受祖先 transform 干扰。直接切到停靠态，
+  // 再用 body 级克隆从槽位右缘展开，与离场的收拢正好对称。
+  if (entering && next) {
+    docked.value = true;
+    await nextTick();
+    // 搜索框飞行中：目标已被 morphInFlight 藏起等克隆降落，
+    // 别再叠一层停靠克隆，两个浮层会打架
+    if (morphInFlight.value) return;
+
+    // 入场期间不要实测真实元素：它是过渡中页面的后代，祖先 transform
+    // 会让 fixed 的包含块变成那个祖先，量出来的坐标带着过渡位移，
+    // 克隆按它落位会在过渡结束时跳一下。改用锚点直接算终点 ——
+    // 与 dockedStyle 同一组数字，落点自然和过渡结束后的真实位置重合。
+    const anchor = dockAnchor.value;
+    if (!anchor) return;
+    const height = lockedHeight.value || el.offsetHeight;
+    flyDockIn(el, {
+      left: anchor.right - DOCK_WIDTH,
+      top: anchor.centerY - height / 2,
+      right: anchor.right,
+      width: DOCK_WIDTH,
+      height
+    });
+    return;
+  }
+
   const from = el.getBoundingClientRect();
 
   docked.value = next;
@@ -199,15 +249,40 @@ const setDocked = async (next) => {
 
 const evaluateDock = () => {
   if (!slotEl.value) return;
+
   // 移动端不停靠：Header 槽位是 d-none，且窄屏没有横向空间
   if (window.innerWidth < 768 || !dockAnchor.value) {
     if (docked.value) setDocked(false);
     return;
   }
-  // 停靠后原位占位仍随页面滚动，所以这个 top 始终是"未停靠时该在哪"
-  const top = slotEl.value.getBoundingClientRect().top;
-  if (!docked.value && top < DOCK_ON) setDocked(true);
-  else if (docked.value && top > DOCK_OFF) setDocked(false);
+  // 停靠后原位占位仍随页面滚动，所以这个 rect 始终是"未停靠时该在哪"
+  const rect = slotEl.value.getBoundingClientRect();
+  const line = dockAnchor.value.headerBottom;
+
+  // 两条阈值取同一条基准线（Header 下边缘），只是量搜索框的不同边：
+  // 下边缘越过基准线 = 已被 Header 完全盖住，这时才停靠；
+  // 上边缘退回基准线以下 = 完全露出来了，复位。
+  // 滞回区自然等于搜索框自身高度，不需要额外的经验常数，
+  // 也就不会出现阈值把静止位置顶出判定范围、导致复位判不出来的情况。
+  if (!docked.value && rect.bottom < line) {
+    /* 走克隆展开还是走 FLIP，两个条件任一成立就走克隆：
+
+       1) 原位已滚出视口上方（rect.bottom <= 0）—— FLIP 的起点在屏幕外
+          几百像素，动画会变成搜索框从上方远处飞进来
+       2) 页面过渡还在跑 —— 祖先 transform 让 fixed 定位失准，opacity
+          淡入把动画整段盖住，这正是"切回本页且不在顶部"命中的情形。
+          浅滚动（scrollY 约 62~126）时原位还在视口里，条件 1 盖不住，
+          得靠这条兜住
+
+       都不成立就是用户在本页正常上下滚动，原位可见、页面已安定，
+       FLIP 才是对的。
+
+       判定不依赖"挂载后第一次"或计时器窗口：接口快慢、滚动恢复时机
+       都不影响结论。 */
+    setDocked(true, rect.bottom <= 0 || pageTransitionActive());
+  } else if (docked.value && rect.top > line) {
+    setDocked(false);
+  }
 };
 
 // 彻底清除卡片所有 inline style
@@ -352,6 +427,10 @@ const fetchEntries = async () => {
     entries.value = [];
   } finally {
     loading.value = false;
+    // 列表填进来后页面才够高，重判一次。挂载时那次判定页面只有 spinner
+    // 那么高，滚动位置够深也判不出该停靠
+    await nextTick();
+    evaluateDock();
   }
 };
 
@@ -370,6 +449,9 @@ const handleSearch = async () => {
     entries.value = [];
   } finally {
     loading.value = false;
+    // 结果条数变了，页面高度跟着变，停靠条件可能已经不成立
+    await nextTick();
+    evaluateDock();
   }
 };
 
@@ -389,6 +471,20 @@ onMounted(async () => {
   window.addEventListener('scroll', evaluateDock, { passive: true });
   window.addEventListener('resize', evaluateDock);
   evaluateDock();
+});
+
+/* 停靠态下离开本页，交给 flyDockOut 演完收拢。
+   用 onBeforeRouteLeave 而非 onBeforeUnmount：out-in 模式下卸载发生在
+   离场过渡结束之后，那时才复位槽位，导航栏里会先空着一块慢慢合上。
+   这个钩子在导航确认前触发，DOM 还完整，量得到停靠位置。 */
+onBeforeRouteLeave(() => {
+  // 先摘监听：页面此刻仍停在滚动位置，过渡期间任何 scroll/resize
+  // 都会让 evaluateDock 判定该重新停靠，把刚收起的槽位又推开
+  window.removeEventListener('scroll', evaluateDock);
+  window.removeEventListener('resize', evaluateDock);
+  // 停靠 FLIP 若还在半空，取消掉，rect 才是槽位里的最终落点
+  dockAnim?.cancel();
+  flyDockOut(searchBoxEl.value);
 });
 
 onBeforeUnmount(() => {
