@@ -22,7 +22,7 @@ const prefersReducedMotion = () =>
 const px = (v) => parseFloat(v) || 0
 
 // input-group 这类容器自身没有圆角，圆角在子元素上，需要向下找一层
-const effectiveRadius = (el) => {
+export const effectiveRadius = (el) => {
   let r = px(getComputedStyle(el).borderTopLeftRadius)
   if (r > 0) return r
   for (const child of el.children) {
@@ -41,7 +41,7 @@ const copyInputValues = (source, clone) => {
 }
 
 // 克隆一层搜索框，撑满 wrapper；圆角交给 wrapper 裁剪，自身归零
-const makeLayer = (source, opacity) => {
+export const cloneAsLayer = (source, opacity) => {
   const layer = source.cloneNode(true)
   copyInputValues(source, layer)
   Object.assign(layer.style, {
@@ -103,7 +103,7 @@ export function beginSearchMorph(sourceEl) {
     pointerEvents: 'none',
     willChange: 'left, top, width, height'
   })
-  wrapper.appendChild(makeLayer(sourceEl, 1))
+  wrapper.appendChild(cloneAsLayer(sourceEl, 1))
   document.body.appendChild(wrapper)
 
   flight = { wrapper, timer: setTimeout(cleanup, FALLBACK_MS) }
@@ -126,8 +126,8 @@ export function finishSearchMorph(targetEl) {
 
   const layerA = wrapper.firstElementChild
   // 目标此刻是 visibility: hidden（由 morphInFlight 驱动），
-  // 克隆出来的 layerB 在 makeLayer 里强制改回 visible
-  const layerB = makeLayer(targetEl, 0)
+  // 克隆出来的 layerB 在 cloneAsLayer 里强制改回 visible
+  const layerB = cloneAsLayer(targetEl, 0)
   wrapper.appendChild(layerB)
 
   const opts = { duration: DURATION, easing: EASING, fill: 'forwards' }

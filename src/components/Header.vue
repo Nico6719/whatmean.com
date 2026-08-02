@@ -118,12 +118,17 @@ export default {
     },
     // 上报槽位锚点。槽位所在 flex 组右对齐，右边缘不随开合变化，
     // 所以折叠状态下量的值也是对的，不用等展开动画。
+    // 一并上报 Header 下边缘，Entry.vue 用它算停靠阈值。
     reportDockAnchor() {
       const el = this.$refs.dockEl;
       // d-none 时 offsetParent 为 null（移动端），量出来全是 0，不要上报
       if (!el || el.offsetParent === null) return;
       const r = el.getBoundingClientRect();
-      setDockAnchor({ right: r.right, centerY: r.top + r.height / 2 });
+      setDockAnchor({
+        right: r.right,
+        centerY: r.top + r.height / 2,
+        headerBottom: this.$el.getBoundingClientRect().bottom
+      });
     }
   },
   mounted() {
