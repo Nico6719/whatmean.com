@@ -26,9 +26,19 @@
               </li>
             </ul>
           </nav>
-          
-          <button 
-            class="navbar-toggler border-0 d-md-none" 
+
+          <!-- 搜索框停靠槽位：词条页向下滚动时，页内搜索框飞到这里。
+               宽度从 0 展开把 nav 往左推让位，折叠时不占空间。
+               槽位本身是空的，搜索框由 Entry.vue 以 fixed 定位覆盖上来。 -->
+          <div
+            class="search-dock d-none d-md-block"
+            :class="{ 'search-dock--open': docked }"
+            ref="dockEl"
+            aria-hidden="true"
+          ></div>
+
+          <button
+            class="navbar-toggler border-0 d-md-none"
             type="button" 
             :aria-expanded="mobileMenuOpen ? 'true' : 'false'"
             aria-label="切换导航菜单"
@@ -75,13 +85,14 @@
 <script>
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
+import { docked, setDockAnchor } from '../composables/useSearchDock'
 
 export default {
   name: 'Header',
   setup() {
     const route = useRoute()
     const isHome = computed(() => route.path === '/')
-    return { isHome }
+    return { isHome, docked }
   },
   data() {
     return {
@@ -100,15 +111,26 @@ export default {
       if (window.innerWidth >= 768) {
         this.mobileMenuOpen = false;
       }
+      this.reportDockAnchor();
     },
     handleScroll() {
       this.scrolled = window.scrollY > 30;
+    },
+    // 上报槽位锚点。槽位所在 flex 组右对齐，右边缘不随开合变化，
+    // 所以折叠状态下量的值也是对的，不用等展开动画。
+    reportDockAnchor() {
+      const el = this.$refs.dockEl;
+      // d-none 时 offsetParent 为 null（移动端），量出来全是 0，不要上报
+      if (!el || el.offsetParent === null) return;
+      const r = el.getBoundingClientRect();
+      setDockAnchor({ right: r.right, centerY: r.top + r.height / 2 });
     }
   },
   mounted() {
     window.addEventListener('resize', this.handleResize);
     window.addEventListener('scroll', this.handleScroll, { passive: true });
     this.handleScroll();
+    this.reportDockAnchor();
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.handleResize);
@@ -153,6 +175,26 @@ export default {
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.10);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
+}
+
+/* ===== 搜索框停靠槽位 =====
+   空占位，只负责把 nav 往左推让出空间。
+   高度固定 38px 让垂直中心稳定，Entry.vue 据此对齐。
+   margin-left 抵消父级 gap-2，折叠时不留下 8px 空隙。 */
+.search-dock {
+  flex: 0 0 auto;
+  width: 0;
+  height: 38px;
+  margin-left: -0.5rem;
+  pointer-events: none;
+  transition:
+    width 380ms cubic-bezier(0.4, 0, 0.2, 1),
+    margin-left 380ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-dock--open {
+  width: 280px;
+  margin-left: 0;
 }
 
 /* 品牌名颜色 */
