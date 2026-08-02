@@ -358,3 +358,12 @@ html[data-theme="light"] .meme-card:hover {
     inset 0 1px 0 rgba(255, 255, 255, 0.90),
     inset 0 -1px 0 rgba(0, 0, 0, 0.06);
 }
+
+/* ===================================================
+   搜索框跨页克隆飞行 —— 浮层容器
+   由 useSearchMorph.js 动态创建，此处只声明基础层级
+   =================================================== */
+.search-morph-layer {
+  pointer-events: none;
+}
+

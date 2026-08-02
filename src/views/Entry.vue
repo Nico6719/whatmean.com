@@ -3,12 +3,17 @@
     <div class="container-fluid px-4 px-md-5 pt-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div></div>
-        <div>
-          <div class="input-group w-100 w-md-auto">
-            <input 
-              type="text" 
-              class="form-control liquid-glass-input" 
-              placeholder="搜索词条..." 
+        <div class="search-slot" ref="slotEl" :style="slotStyle">
+          <div
+            class="input-group w-100 w-md-auto"
+            ref="searchBoxEl"
+            :class="{ 'is-docked': docked }"
+            :style="[morphInFlight ? { visibility: 'hidden' } : null, dockedStyle]"
+          >
+            <input
+              type="text"
+              class="form-control liquid-glass-input"
+              placeholder="搜索词条..."
               v-model="searchQuery"
               @input="handleSearch"
             >
@@ -92,11 +97,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import { useHead } from '@unhead/vue';
 import entriesApi from '../services/api';
 import MorphModal from '../components/MorphModal.vue';
+import { finishSearchMorph, cancelSearchMorph, morphInFlight } from '../composables/useSearchMorph';
+import {
+  docked,
+  dockAnchor,
+  resetDock,
+  DOCK_WIDTH,
+  DOCK_DURATION,
+  DOCK_EASING
+} from '../composables/useSearchDock';
 
 const route = useRoute();
 
@@ -121,6 +135,80 @@ const selectedEntry = ref({});
 const cardRect = ref(null);
 const activeCardEl = ref(null);
 const cardTimers = ref([]);
+// 首页搜索框飞过来时的落点
+const searchBoxEl = ref(null);
+
+/* ===== 滚动停靠 =====
+   搜索框快被固定 Header 盖住时，改为 fixed 贴进 Header 的槽位。
+   一对上下阈值构成滞回区，避免临界点反复开合抖动。 */
+const DOCK_ON = 72;
+const DOCK_OFF = 92;
+
+const slotEl = ref(null);
+// 停靠后搜索框脱离文档流，用它把原位的高度撑住，防止内容跳动
+const lockedHeight = ref(0);
+let dockAnim = null;
+
+const slotStyle = computed(() =>
+  docked.value && lockedHeight.value ? { height: `${lockedHeight.value}px` } : null
+);
+
+const dockedStyle = computed(() => {
+  if (!docked.value || !dockAnchor.value) return null;
+  const { right, centerY } = dockAnchor.value;
+  return {
+    position: 'fixed',
+    left: `${right - DOCK_WIDTH}px`,
+    top: `${centerY - lockedHeight.value / 2}px`,
+    width: `${DOCK_WIDTH}px`,
+    margin: '0',
+    zIndex: '1001'
+  };
+});
+
+const canAnimate = () =>
+  typeof Element.prototype.animate === 'function' &&
+  !(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false);
+
+// FLIP：先记起点，切状态，再从起点动画到新位置
+const setDocked = async (next) => {
+  const el = searchBoxEl.value;
+  if (!el || docked.value === next) return;
+
+  if (!lockedHeight.value) lockedHeight.value = el.offsetHeight;
+  const from = el.getBoundingClientRect();
+
+  docked.value = next;
+  await nextTick();
+
+  const to = el.getBoundingClientRect();
+  dockAnim?.cancel();
+  if (!canAnimate()) return;
+
+  dockAnim = el.animate(
+    [
+      {
+        transform: `translate(${from.left - to.left}px, ${from.top - to.top}px)`,
+        width: `${from.width}px`
+      },
+      { transform: 'none', width: `${to.width}px` }
+    ],
+    { duration: DOCK_DURATION, easing: DOCK_EASING }
+  );
+};
+
+const evaluateDock = () => {
+  if (!slotEl.value) return;
+  // 移动端不停靠：Header 槽位是 d-none，且窄屏没有横向空间
+  if (window.innerWidth < 768 || !dockAnchor.value) {
+    if (docked.value) setDocked(false);
+    return;
+  }
+  // 停靠后原位占位仍随页面滚动，所以这个 top 始终是"未停靠时该在哪"
+  const top = slotEl.value.getBoundingClientRect().top;
+  if (!docked.value && top < DOCK_ON) setDocked(true);
+  else if (docked.value && top > DOCK_OFF) setDocked(false);
+};
 
 // 彻底清除卡片所有 inline style
 const resetCard = (card) => {
@@ -285,18 +373,34 @@ const handleSearch = async () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   if (route.query.q) {
     searchQuery.value = route.query.q;
     handleSearch();
   } else {
     fetchEntries();
   }
+  // 等 DOM 就位（含填好的搜索词）再上报落点，让浮层克隆飞过来
+  await nextTick();
+  finishSearchMorph(searchBoxEl.value);
+
+  // 趁未停靠时量下高度，之后停靠要用它撑住原位
+  if (searchBoxEl.value) lockedHeight.value = searchBoxEl.value.offsetHeight;
+  window.addEventListener('scroll', evaluateDock, { passive: true });
+  window.addEventListener('resize', evaluateDock);
+  evaluateDock();
 });
 
 onBeforeUnmount(() => {
   if (activeCardEl.value) resetCard(activeCardEl.value);
   cardTimers.value.forEach(t => clearTimeout(t));
+  cancelSearchMorph();
+
+  window.removeEventListener('scroll', evaluateDock);
+  window.removeEventListener('resize', evaluateDock);
+  dockAnim?.cancel();
+  // docked 是跨组件共享状态，离开页面必须复位，否则 Header 槽位一直开着
+  resetDock();
 });
 </script>
 
@@ -396,6 +500,20 @@ onBeforeUnmount(() => {
 @keyframes floatIn {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 停靠时搜索框转 fixed，这里保持右对齐并由内联 height 撑住原位高度 */
+.search-slot {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 停靠态：贴进 Header 后收窄圆角，与导航栏的紧凑观感一致 */
+.is-docked .liquid-glass-input {
+  border-radius: 16px 0 0 16px;
+}
+.is-docked .btn-primary {
+  border-radius: 0 16px 16px 0;
 }
 
 /* ===== 搜索框样式 — 深色毛玻璃 ===== */

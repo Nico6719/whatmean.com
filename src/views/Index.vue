@@ -7,10 +7,10 @@
           <div class="col-12 text-center text-white">
             <h1 class="display-2 fw-bold mb-4 hero-title">何意味<span class="domain">.com</span></h1>
             <p class="lead fs-3 mb-5 hero-subtitle">记录时代的网络文化符号</p>
-            <div class="search-box liquid-glass-search mx-auto">
-              <input 
-                type="text" 
-                class="form-control form-control-lg" 
+            <div class="search-box liquid-glass-search mx-auto" ref="searchBox">
+              <input
+                type="text"
+                class="form-control form-control-lg"
                 placeholder="搜索热梗词汇..."
                 v-model="searchQuery"
                 @keyup.enter="searchEntries"
@@ -38,6 +38,7 @@
 
 <script>
 import { useHead } from '@unhead/vue'
+import { beginSearchMorph } from '../composables/useSearchMorph'
 
 export default {
   name: 'Index',
@@ -59,9 +60,11 @@ export default {
   },
   methods: {
     searchEntries() {
-      if (this.searchQuery.trim()) {
-        this.$router.push(`/entries?q=${this.searchQuery}`);
-      }
+      if (!this.searchQuery.trim()) return;
+      const target = `/entries?q=${encodeURIComponent(this.searchQuery)}`;
+      // 起飞：抓取当前搜索框做浮层克隆，词条页挂载后会接手落地动画
+      beginSearchMorph(this.$refs.searchBox);
+      this.$router.push(target);
     },
     exploreEntries() {
       this.$router.push('/entries');
