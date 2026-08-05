@@ -1,0 +1,3 @@
+allowBuilds:
+  # 仅用于 dev 时的文件监听加速，构建不依赖它的原生模块
+  '@parcel/watcher': false

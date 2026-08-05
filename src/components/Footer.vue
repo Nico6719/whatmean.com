@@ -7,8 +7,15 @@
           <p class="text-white-50">
             记录和分享最新的网络热词和流行文化，帮助大家更好地理解和融入当代网络环境。
           </p>
+          <!-- 广告位：页脚品牌简介下方 -->
+          <AdSlot
+            :position="AD_POSITIONS.FOOTER_BRAND"
+            variant="card"
+            min-height="96px"
+            :placeholder="showAdPlaceholder"
+          />
         </div>
-        
+
         <div class="col-12 col-md-2 mb-4 mb-md-0 d-none d-md-block">
           <h4 class="h6 fw-bold text-uppercase text-primary mb-3">快速链接</h4>
           <ul class="list-unstyled">
@@ -41,6 +48,16 @@
             </li>
           </ul>
         </div>
+
+        <!-- 广告位：页脚右侧横幅 -->
+        <div class="col-12 col-md-4 mb-4 mb-md-0 d-flex align-items-center">
+          <AdSlot
+            :position="AD_POSITIONS.FOOTER_BANNER"
+            variant="banner"
+            min-height="120px"
+            :placeholder="showAdPlaceholder"
+          />
+        </div>
       </div>
       <hr class="my-4">
       
@@ -61,8 +78,19 @@
 </template>
 
 <script>
+import AdSlot from './AdSlot.vue'
+import { AD_POSITIONS } from '../services/ads.js'
+
 export default {
-  name: 'Footer'
+  name: 'Footer',
+  components: { AdSlot },
+  data() {
+    return {
+      AD_POSITIONS,
+      // 开发环境显示占位框，方便确认位置；生产环境无广告时不留白
+      showAdPlaceholder: import.meta.env.DEV
+    }
+  }
 }
 </script>
 
