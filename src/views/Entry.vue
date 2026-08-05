@@ -533,6 +533,18 @@ onBeforeUnmount(() => {
   min-height: 320px;
   display: flex;
   flex-direction: column;
+  /* 卡片本体是 <a>（为了可抓取、可中键开新标签），得压掉链接默认样式。
+     main.js 里 style.css 在 bootstrap 之前导入，所以 bootstrap 的
+     a{text-decoration:underline;color:...} 后加载胜出，卡片标题和正文
+     会带上下划线并被染成链接色 —— 原先是 <div> 时没这个问题。 */
+  text-decoration: none;
+  color: inherit;
+}
+
+.meme-card:hover,
+.meme-card:focus {
+  text-decoration: none;
+  color: inherit;
 }
 
 .liquid-glass-card {
