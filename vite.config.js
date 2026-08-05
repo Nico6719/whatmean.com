@@ -8,6 +8,9 @@ import prerenderPlugin from './scripts/vite-plugin-prerender.js'
 // 站点规范地址，预渲染的 canonical / sitemap / JSON-LD 都以它为准
 const SITE_URL = process.env.VITE_SITE_URL || 'https://xn--vqqq8jxym.com'
 
+// demo / 预览环境置 true：整站注入 noindex 并禁止抓取，避免和生产站重复内容
+const NOINDEX = process.env.VITE_NOINDEX === 'true'
+
 // https://vite.dev/config/
 export default defineConfig({
   preview: {
@@ -25,7 +28,8 @@ export default defineConfig({
     }),
     prerenderPlugin({
       entryDir: resolve(__dirname, 'entry'),
-      siteUrl: SITE_URL
+      siteUrl: SITE_URL,
+      noindex: NOINDEX
     }),
   ],
   resolve: {

@@ -72,6 +72,9 @@ const readEntries = (entryDir) => {
 const stripSeoTags = (html) =>
   html
     .replace(/<title>[\s\S]*?<\/title>/i, '')
+    // robots 也要摘：noindex 模式下若留着模板里的 index,follow，
+    // 一个 head 里就会同时出现两条互相矛盾的指令
+    .replace(/<meta\s+name="robots"[^>]*>/gi, '')
     .replace(/<meta\s+name="description"[^>]*>/gi, '')
     .replace(/<meta\s+name="keywords"[^>]*>/gi, '')
     .replace(/<link\s+rel="canonical"[^>]*>/gi, '')
@@ -79,7 +82,7 @@ const stripSeoTags = (html) =>
     .replace(/<meta\s+name="twitter:[^"]*"[^>]*>/gi, '')
     .replace(/<script\s+type="application\/ld\+json">[\s\S]*?<\/script>/gi, '')
 
-const buildHead = (entry, siteUrl) => {
+const buildHead = (entry, siteUrl, noindex) => {
   const url = `${siteUrl}/entry/${encodeURIComponent(entry.slug)}`
   const title = `${entry.name}是什么意思？ - 何意味`
   const description = toDescription(entry.explanation || entry.detail)
@@ -102,7 +105,13 @@ const buildHead = (entry, siteUrl) => {
   }
 }`
 
+  /* demo / 预览环境：整站 noindex。
+   * 不这么做的话 demo.何意味.com 会和生产站输出逐字相同的 48 个词条页，
+   * 两边互为重复内容，搜索引擎只会保留其中一个，很可能保留的是 demo。 */
+  const robots = noindex ? 'noindex, nofollow' : 'index, follow'
+
   return `
+    <meta name="robots" content="${robots}" />
     <title>${escapeHtml(title)}</title>
     <meta name="description" content="${escapeHtml(description)}" />
     <meta name="keywords" content="${escapeHtml([entry.name, ...tags, '网络热梗', '什么意思'].join(','))}" />
@@ -206,6 +215,7 @@ ${urls.join('\n')}
 export default function prerenderPlugin(options = {}) {
   const entryDir = options.entryDir || resolve(process.cwd(), 'entry')
   const siteUrl = (options.siteUrl || 'https://xn--vqqq8jxym.com').replace(/\/$/, '')
+  const noindex = Boolean(options.noindex)
   let outDir = 'dist'
 
   return {
@@ -238,7 +248,7 @@ export default function prerenderPlugin(options = {}) {
       const start = Date.now()
 
       for (const entry of entries) {
-        const head = buildHead(entry, siteUrl) + PRERENDER_STYLE
+        const head = buildHead(entry, siteUrl, noindex) + PRERENDER_STYLE
         const html = stripped
           .replace('</head>', `${head}  </head>`)
           .replace('<div id="app"></div>', `<div id="app">${buildBody(entry)}</div>`)
@@ -246,6 +256,29 @@ export default function prerenderPlugin(options = {}) {
         const dir = join(distDir, 'entry', entry.slug)
         mkdirSync(dir, { recursive: true })
         writeFileSync(join(dir, 'index.html'), html, 'utf-8')
+      }
+
+      if (noindex) {
+        /* 首页模板也补一份 noindex，并把 robots.txt 整体改成禁止抓取。
+         * robots.txt 的 Disallow 只拦抓取、不保证从已有索引里删除，
+         * 所以两层都要有：meta 负责去索引，robots.txt 负责别再来。
+         * 同时不输出 sitemap —— 主动提交一份自己声明 noindex 的地址列表没有意义。 */
+        writeFileSync(
+          templatePath,
+          template
+            .replace(/<meta\s+name="robots"[^>]*>/gi, '')
+            .replace('</head>', '  <meta name="robots" content="noindex, nofollow" />\n  </head>'),
+          'utf-8'
+        )
+        writeFileSync(
+          join(distDir, 'robots.txt'),
+          'User-agent: *\nDisallow: /\n',
+          'utf-8'
+        )
+        console.log(
+          `[prerender] 已生成 ${entries.length} 个词条页（noindex 模式，不输出 sitemap，${Date.now() - start}ms）`
+        )
+        return
       }
 
       writeFileSync(join(distDir, 'sitemap.xml'), buildSitemap(entries, siteUrl), 'utf-8')
