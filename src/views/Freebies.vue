@@ -57,10 +57,23 @@
 
 <script>
 import FreebieModal from '../components/FreebieModal.vue'
+import { SITE_URL } from '../config/site'
 
 export default {
   name: 'Freebies',
   components: { FreebieModal },
+  head() {
+    return {
+      title: '免费资源 - 何意味',
+      link: [{ rel: 'canonical', href: `${SITE_URL}/freebies` }],
+      meta: [
+        { name: 'description', content: '何意味整理的免费与低价资源推荐，涵盖云服务器、开发工具等实用服务。' },
+        { property: 'og:title', content: '免费资源 - 何意味' },
+        { property: 'og:description', content: '何意味整理的免费与低价资源推荐。' },
+        { property: 'og:url', content: `${SITE_URL}/freebies` }
+      ]
+    }
+  },
   data() {
     return {
       iconError: {},

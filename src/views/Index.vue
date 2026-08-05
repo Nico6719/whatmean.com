@@ -37,8 +37,8 @@
 </template>
 
 <script>
-import { useHead } from '@unhead/vue'
 import { beginSearchMorph } from '../composables/useSearchMorph'
+import { SITE_URL } from '../config/site'
 
 export default {
   name: 'Index',
@@ -51,10 +51,10 @@ export default {
     return {
       title: '何意味 - 网络热梗百科，记录时代的网络文化符号',
       meta: [
-        { name: 'description', content: '何意味致力于收集、整理和传播中国互联网上的各类热门梗、流行语和网络文化现象。搜索和浏览海量网络炭梗。' },
-        { property: 'og:title', content: '何意味 - 网络炭梗百科' },
-        { property: 'og:description', content: '记录时代的网络文化符号。搜索和浏览海量网络炭梗。' },
-        { property: 'og:url', content: 'https://xn--vqqq8jxym.com/' }
+        { name: 'description', content: '何意味致力于收集、整理和传播中国互联网上的各类热门梗、流行语和网络文化现象。搜索和浏览海量网络热梗。' },
+        { property: 'og:title', content: '何意味 - 网络热梗百科' },
+        { property: 'og:description', content: '记录时代的网络文化符号。搜索和浏览海量网络热梗。' },
+        { property: 'og:url', content: `${SITE_URL}/` }
       ]
     }
   },
@@ -84,7 +84,7 @@ export default {
 .hero-section {
   height: 100vh;
   min-height: 500px;
-  /* 背景图由 body 提供，这里只加一层暗色遯层增强可读性 */
+  /* 背景图由 body 提供，这里只加一层暗色遮罩增强可读性 */
   background: linear-gradient(rgba(0, 0, 0, 0.40), rgba(0, 0, 0, 0.40));
   position: relative;
 }

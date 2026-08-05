@@ -126,16 +126,19 @@
 </template>
 
 <script>
+import { SITE_URL } from '../config/site'
+
 export default {
   name: 'EntryGenerator',
   head() {
     return {
       title: '词条生成器 - 何意味',
+      link: [{ rel: 'canonical', href: `${SITE_URL}/entry-generator` }],
       meta: [
         { name: 'description', content: '使用何意味词条生成器，提交你发现的新网络热梗，共同完善网络热梗百科。' },
         { property: 'og:title', content: '词条生成器 - 何意味' },
         { property: 'og:description', content: '提交你发现的新网络热梗，共同完善网络热梗百科。' },
-        { property: 'og:url', content: 'https://xn--vqqq8jxym.com/entry-generator' }
+        { property: 'og:url', content: `${SITE_URL}/entry-generator` }
       ]
     }
   },
