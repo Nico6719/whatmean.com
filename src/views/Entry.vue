@@ -546,9 +546,12 @@ onBeforeUnmount(() => {
   flex-direction: column;
 }
 
-/* 广告卡片：占用一个词条卡片位，视觉与词条卡片一致但无 hover 位移和点击态 */
+/* 广告卡片：占用一个词条卡片位，视觉与词条卡片一致但无 hover 位移和点击态。
+   广告素材本身是 Google 渲染的白底 iframe，无法被外部样式改色，
+   所以留出深色内边距，把白广告作为卡片内嵌的圆角广告块，避免整块白色突兀。 */
 .ad-card {
   min-height: 320px;
+  padding: 12px;
   align-items: center;
   justify-content: center;
   cursor: default;
@@ -561,6 +564,8 @@ onBeforeUnmount(() => {
 
 .ad-card .adsbygoogle {
   width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .liquid-glass-card {
