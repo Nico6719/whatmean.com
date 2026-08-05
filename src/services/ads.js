@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { resolveApiBaseUrl } from '../config/site';
 
 // 广告接口客户端，与 entriesApi 共用同一个后端地址
 const adsClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
+  baseURL: resolveApiBaseUrl(),
   timeout: 5000,
   headers: {
     'Content-Type': 'application/json'
@@ -18,8 +19,18 @@ export const AD_POSITIONS = {
 // 是否启用广告请求，未配置时默认关闭，广告位只展示本站加群卡片
 const ADS_ENABLED = String(import.meta.env.VITE_ADS_ENABLED) === 'true';
 
-// QQ 群加群链接，未配置时广告位不渲染
-const QQ_GROUP_URL = import.meta.env.VITE_QQ_GROUP_URL || '';
+/**
+ * QQ 群加群链接。
+ *
+ * 默认值不留空：部署环境（EdgeOne 控制台）没有配置任何 VITE_ 变量，
+ * 而仓库里提交的 .env 也没有这一项，于是线上 QQ_GROUP_URL 恒为空字符串，
+ * 两个页脚广告位一个都不渲染 —— 广告位功能等于没上线。
+ *
+ * 这个链接本身不是机密，About 页早已明文写着同一个地址，
+ * 所以直接内置为默认值，环境变量仍可覆盖。
+ */
+const QQ_GROUP_URL =
+  import.meta.env.VITE_QQ_GROUP_URL || 'https://qm.qq.com/q/hBcOiafEti';
 
 // 只接受 http(s) 链接，挡掉 javascript: 之类的伪协议
 const safeUrl = (value) => {

@@ -143,16 +143,19 @@
 </template>
 
 <script>
+import { SITE_URL } from '../config/site'
+
 export default {
   name: 'About',
   head() {
     return {
       title: '关于网站 - 何意味',
+      link: [{ rel: 'canonical', href: `${SITE_URL}/about` }],
       meta: [
         { name: 'description', content: '何意味致力于收集、整理和传播中国互联网上的各类热门梗、流行语和网络文化现象。涵盖收录、实时更新、社区参与等特色功能。' },
         { property: 'og:title', content: '关于网站 - 何意味' },
         { property: 'og:description', content: '了解何意味的使命与特色，共同建设网络热梗百科。' },
-        { property: 'og:url', content: 'https://xn--vqqq8jxym.com/about' }
+        { property: 'og:url', content: `${SITE_URL}/about` }
       ]
     }
   },

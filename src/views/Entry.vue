@@ -53,12 +53,22 @@
         <div v-if="entries.length === 0" class="col-12 text-center">
           <p class="text-white">没有找到词条</p>
         </div>
-        <div 
-          class="col-xl-3 col-lg-4 col-md-6" 
-          v-for="entry in entries" 
+        <div
+          class="col-xl-3 col-lg-4 col-md-6"
+          v-for="entry in entries"
           :key="entry.id"
         >
-          <div class="card h-100 liquid-glass-card meme-card" @click="showEntryDetail(entry, $event)" style="cursor: pointer;">
+          <!-- 卡片是真正的 <a href>，而不是带 @click 的 div：
+               1) 键盘可达 —— Tab 能聚焦、回车能打开，以前完全打不开
+               2) 爬虫可抓 —— 链接指向预渲染出来的词条详情页
+               3) Ctrl / 中键点击能开新标签，符合用户对链接的预期
+               普通左键点击仍然拦下来走弹窗，保持原有交互 -->
+          <a
+            class="card h-100 liquid-glass-card meme-card"
+            :href="`/entry/${encodeURIComponent(entry.slug)}`"
+            :aria-label="`查看词条 ${entry.name} 的详细介绍`"
+            @click="showEntryDetail(entry, $event)"
+          >
             <div class="liquid-glass-card-hover">
               <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-2">
@@ -69,19 +79,18 @@
                 <p class="card-text">{{ entry.explanation }}</p>
                 <div class="d-flex justify-content-between align-items-end flex-wrap gap-2" style="margin-top: auto; padding-top: 1rem;">
                   <div class="tags flex-grow-1">
-                    <span 
-                      v-for="(tag, index) in (entry.tags || '').split(',')" 
-                      :key="index" 
+                    <span
+                      v-for="tag in splitTags(entry.tags)"
+                      :key="tag"
                       class="badge tag-badge me-1"
-                      v-show="tag.trim() !== ''"
                     >
-                      {{ tag.trim() }}
+                      {{ tag }}
                     </span>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          </a>
         </div>
       </div>
     </div>
@@ -104,6 +113,7 @@ import { useRoute, onBeforeRouteLeave } from 'vue-router';
 import { useHead } from '@unhead/vue';
 import entriesApi from '../services/api';
 import MorphModal from '../components/MorphModal.vue';
+import { SITE_URL } from '../config/site';
 import { finishSearchMorph, cancelSearchMorph, morphInFlight } from '../composables/useSearchMorph';
 import {
   docked,
@@ -121,11 +131,12 @@ const route = useRoute();
 
 useHead({
   title: '网络热梗词条 - 何意味',
+  link: [{ rel: 'canonical', href: `${SITE_URL}/entries` }],
   meta: [
     { name: 'description', content: '浏览何意味收录的全部网络热梗词条，涵盖从早期经典到最新流行的各类网络文化符号。' },
     { property: 'og:title', content: '网络热梗词条 - 何意味' },
     { property: 'og:description', content: '浏览全部网络热梗词条，涵盖从早期经典到最新流行的各类网络文化符号。' },
-    { property: 'og:url', content: 'https://xn--vqqq8jxym.com/entries' }
+    { property: 'og:url', content: `${SITE_URL}/entries` }
   ]
 });
 
@@ -297,7 +308,22 @@ const resetCard = (card) => {
   }
 };
 
+// 标签串拆成数组并滤掉空项。
+// 以前用 v-show 藏空标签，DOM 里仍然留着一堆空的 <span>
+const splitTags = (tags) =>
+  String(tags || '')
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
+
 const showEntryDetail = (entry, event) => {
+  /* 带修饰键或非左键：不拦，让浏览器按真实链接处理（开新标签 / 新窗口）。
+     只有普通左键点击才拦下来走弹窗动画。 */
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
+    return;
+  }
+  event.preventDefault();
+
   const card = event.currentTarget.closest('.liquid-glass-card') || event.target.closest('.liquid-glass-card');
 
   if (activeCardEl.value && activeCardEl.value !== card) {
