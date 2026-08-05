@@ -1,18 +1,25 @@
-import {defineConfig} from 'vite'
+import {defineConfig, loadEnv} from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import { resolve } from 'path'
 import entryMergePlugin from './scripts/vite-plugin-entry-merge.js'
 import prerenderPlugin from './scripts/vite-plugin-prerender.js'
 
+// https://vite.dev/config/
+export default defineConfig(({ mode }) => {
+// 必须用 loadEnv：Vite 只把 .env 文件里的 VITE_ 变量注入 import.meta.env，
+// 不会写进 process.env。直接读 process.env 的话，.env.production 里配的
+// VITE_NOINDEX / VITE_SITE_URL 在这里恒为 undefined —— 只有 shell 里 export
+// 过的才读得到，等于配置文件白写。第三个参数传 '' 表示不按前缀过滤。
+const env = { ...loadEnv(mode, process.cwd(), ''), ...process.env }
+
 // 站点规范地址，预渲染的 canonical / sitemap / JSON-LD 都以它为准
-const SITE_URL = process.env.VITE_SITE_URL || 'https://xn--vqqq8jxym.com'
+const SITE_URL = env.VITE_SITE_URL || 'https://xn--vqqq8jxym.com'
 
 // demo / 预览环境置 true：整站注入 noindex 并禁止抓取，避免和生产站重复内容
-const NOINDEX = process.env.VITE_NOINDEX === 'true'
+const NOINDEX = env.VITE_NOINDEX === 'true'
 
-// https://vite.dev/config/
-export default defineConfig({
+return {
   preview: {
     allowedHosts: true
   },
@@ -71,4 +78,5 @@ export default defineConfig({
   css: {
     postcss: './postcss.config.cjs'
   }
+}
 })
