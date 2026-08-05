@@ -59,6 +59,17 @@
           />
         </div>
       </div>
+      <!-- 底部-何意味：页脚底部 Google AdSense 自适应横幅 -->
+      <div class="row">
+        <div class="col-12">
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-client="ca-pub-8020398381754493"
+               data-ad-slot="5110548378"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
+        </div>
+      </div>
       <hr class="my-4">
       
       <!-- 版权信息和备案号 -->
@@ -89,6 +100,40 @@ export default {
       AD_POSITIONS,
       // 开发环境显示占位框，方便确认位置；生产环境无广告时不留白
       showAdPlaceholder: import.meta.env.DEV
+    }
+  },
+  mounted() {
+    this.loadAds()
+  },
+  methods: {
+    // 加载 AdSense 脚本（全局仅注入一次），脚本就绪后投放页脚横幅广告
+    loadAds() {
+      const pushAd = () => {
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({})
+        } catch (err) {
+          console.error('广告投放失败', err)
+        }
+      }
+
+      const existing = document.querySelector('script[src*="adsbygoogle.js"]')
+      if (existing) {
+        // 脚本已在 DOM：已加载完直接投放，还在加载则等它加载完再投
+        if (window.adsbygoogle) {
+          pushAd()
+        } else {
+          existing.addEventListener('load', pushAd)
+        }
+        return
+      }
+
+      const script = document.createElement('script')
+      script.async = true
+      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8020398381754493'
+      script.crossOrigin = 'anonymous'
+      script.onload = pushAd
+      script.onerror = () => console.error('AdSense 脚本加载失败')
+      document.head.appendChild(script)
     }
   }
 }
