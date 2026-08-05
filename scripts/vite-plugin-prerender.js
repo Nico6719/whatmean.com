@@ -253,9 +253,18 @@ export default function prerenderPlugin(options = {}) {
           .replace('</head>', `${head}  </head>`)
           .replace('<div id="app"></div>', `<div id="app">${buildBody(entry)}</div>`)
 
+        /* 同一份 HTML 落两个位置，因为静态服务器对 /entry/<slug> 的解析方式不统一：
+         *   <slug>/index.html —— 服务器做目录索引时命中（EdgeOne、nginx 默认）
+         *   <slug>.html       —— 服务器做无扩展名补全时命中（sirv、部分 CDN）
+         * 实测 vite preview（sirv）只认带尾斜杠的 /entry/<slug>/，不带斜杠会直接
+         * 落到 SPA 回退返回首页 HTML。而 canonical 和 sitemap 写的都是不带斜杠的
+         * 形式，只留 index.html 的话，一旦线上服务器和 sirv 行为一致，
+         * 爬虫按 sitemap 抓到的 48 个地址会全部拿到首页内容，预渲染等于没做。
+         * 多写 48 个文件的成本可以忽略，换掉这个不确定性是值得的。 */
         const dir = join(distDir, 'entry', entry.slug)
         mkdirSync(dir, { recursive: true })
         writeFileSync(join(dir, 'index.html'), html, 'utf-8')
+        writeFileSync(join(distDir, 'entry', `${entry.slug}.html`), html, 'utf-8')
       }
 
       if (noindex) {

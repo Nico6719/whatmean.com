@@ -4,6 +4,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 import { resolve } from 'path'
 import entryMergePlugin from './scripts/vite-plugin-entry-merge.js'
 import prerenderPlugin from './scripts/vite-plugin-prerender.js'
+import devEntryRoutePlugin from './scripts/vite-plugin-dev-entry-route.js'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -27,6 +28,7 @@ return {
     allowedHosts: true
   },
   plugins: [
+    devEntryRoutePlugin(),
     vue(),
     vueDevTools(),
     entryMergePlugin({
