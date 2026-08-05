@@ -49,21 +49,10 @@
           </ul>
         </div>
 
-        <!-- 广告位：页脚右侧横幅 -->
+        <!-- 广告位：页脚右侧横幅（Google AdSense） -->
         <div class="col-12 col-md-4 mb-4 mb-md-0 d-flex align-items-center">
-          <AdSlot
-            :position="AD_POSITIONS.FOOTER_BANNER"
-            variant="banner"
-            min-height="120px"
-            :placeholder="showAdPlaceholder"
-          />
-        </div>
-      </div>
-      <!-- 底部-何意味：页脚底部 Google AdSense 自适应横幅 -->
-      <div class="row">
-        <div class="col-12">
-          <ins class="adsbygoogle"
-               style="display:block"
+          <ins class="adsbygoogle footer-ad"
+               style="display:block;width:100%"
                data-ad-client="ca-pub-8020398381754493"
                data-ad-slot="5110548378"
                data-ad-format="auto"
@@ -91,6 +80,7 @@
 <script>
 import AdSlot from './AdSlot.vue'
 import { AD_POSITIONS } from '../services/ads.js'
+import { loadAdSenseScript, pushAd } from '../services/adsense.js'
 
 export default {
   name: 'Footer',
@@ -103,38 +93,10 @@ export default {
     }
   },
   mounted() {
-    this.loadAds()
-  },
-  methods: {
-    // 加载 AdSense 脚本（全局仅注入一次），脚本就绪后投放页脚横幅广告
-    loadAds() {
-      const pushAd = () => {
-        try {
-          (window.adsbygoogle = window.adsbygoogle || []).push({})
-        } catch (err) {
-          console.error('广告投放失败', err)
-        }
-      }
-
-      const existing = document.querySelector('script[src*="adsbygoogle.js"]')
-      if (existing) {
-        // 脚本已在 DOM：已加载完直接投放，还在加载则等它加载完再投
-        if (window.adsbygoogle) {
-          pushAd()
-        } else {
-          existing.addEventListener('load', pushAd)
-        }
-        return
-      }
-
-      const script = document.createElement('script')
-      script.async = true
-      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8020398381754493'
-      script.crossOrigin = 'anonymous'
-      script.onload = pushAd
-      script.onerror = () => console.error('AdSense 脚本加载失败')
-      document.head.appendChild(script)
-    }
+    // 投放页脚 Google AdSense 广告（脚本全局仅注入一次）
+    loadAdSenseScript()
+      .then(pushAd)
+      .catch(() => {})
   }
 }
 </script>
@@ -149,6 +111,12 @@ export default {
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   overflow: hidden;
   position: relative;
+}
+
+/* 页脚右侧 Google AdSense 广告：圆角嵌入浅色玻璃背景，白底广告不会突兀 */
+.footer-ad {
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 a.text-muted:hover {

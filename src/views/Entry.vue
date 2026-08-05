@@ -114,6 +114,7 @@ import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useRoute, onBeforeRouteLeave } from 'vue-router';
 import { useHead } from '@unhead/vue';
 import entriesApi from '../services/api';
+import { loadAdSenseScript, pushAd } from '../services/adsense';
 import MorphModal from '../components/MorphModal.vue';
 import { finishSearchMorph, cancelSearchMorph, morphInFlight } from '../composables/useSearchMorph';
 import {
@@ -466,29 +467,6 @@ const handleSearch = async () => {
   }
 };
 
-/* 加载 AdSense 脚本（全局仅注入一次），脚本就绪后投放广告 */
-const loadAds = () => {
-  const pushAd = () => {
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch (err) {
-      console.error('广告投放失败', err);
-    }
-  };
-
-  if (!window.adsbygoogle) {
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8020398381754493';
-    script.crossOrigin = 'anonymous';
-    script.onload = pushAd;
-    script.onerror = () => console.error('AdSense 脚本加载失败');
-    document.head.appendChild(script);
-  } else {
-    pushAd();
-  }
-};
-
 onMounted(async () => {
   if (route.query.q) {
     searchQuery.value = route.query.q;
@@ -507,7 +485,7 @@ onMounted(async () => {
   evaluateDock();
 
   // 投放 Google 广告
-  loadAds();
+  loadAdSenseScript().then(pushAd).catch(() => {});
 });
 
 /* 停靠态下离开本页，交给 flyDockOut 演完收拢。
