@@ -1,5 +1,5 @@
 <template>
-  <header class="glass-header" :class="{ 'scrolled': scrolled && !isHome, 'menu-open': mobileMenuOpen }">
+  <header class="glass-header" :class="{ 'scrolled': scrolled, 'menu-open': mobileMenuOpen }">
     <div class="container-fluid px-4 px-md-5">
       <div class="d-flex justify-content-between align-items-center">
         <h1 class="h4 mb-0">
@@ -83,16 +83,12 @@
 </template>
 
 <script>
-import { useRoute } from 'vue-router'
-import { computed } from 'vue'
 import { docked, setDockAnchor } from '../composables/useSearchDock'
 
 export default {
   name: 'Header',
   setup() {
-    const route = useRoute()
-    const isHome = computed(() => route.path === '/')
-    return { isHome, docked }
+    return { docked }
   },
   data() {
     return {
