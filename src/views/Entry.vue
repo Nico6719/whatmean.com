@@ -53,6 +53,17 @@
         <div v-if="entries.length === 0" class="col-12 text-center">
           <p class="text-white">没有找到词条</p>
         </div>
+        <!-- 广告A-何意味：占用一个词条卡片位 -->
+        <div v-if="entries.length > 0" class="col-xl-3 col-lg-4 col-md-6">
+          <div class="card h-100 liquid-glass-card ad-card">
+            <ins class="adsbygoogle"
+                 style="display:block;width:100%"
+                 data-ad-client="ca-pub-8020398381754493"
+                 data-ad-slot="2234470574"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+          </div>
+        </div>
         <div 
           class="col-xl-3 col-lg-4 col-md-6" 
           v-for="entry in entries" 
@@ -455,6 +466,29 @@ const handleSearch = async () => {
   }
 };
 
+/* 加载 AdSense 脚本（全局仅注入一次），脚本就绪后投放广告 */
+const loadAds = () => {
+  const pushAd = () => {
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch (err) {
+      console.error('广告投放失败', err);
+    }
+  };
+
+  if (!window.adsbygoogle) {
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8020398381754493';
+    script.crossOrigin = 'anonymous';
+    script.onload = pushAd;
+    script.onerror = () => console.error('AdSense 脚本加载失败');
+    document.head.appendChild(script);
+  } else {
+    pushAd();
+  }
+};
+
 onMounted(async () => {
   if (route.query.q) {
     searchQuery.value = route.query.q;
@@ -471,6 +505,9 @@ onMounted(async () => {
   window.addEventListener('scroll', evaluateDock, { passive: true });
   window.addEventListener('resize', evaluateDock);
   evaluateDock();
+
+  // 投放 Google 广告
+  loadAds();
 });
 
 /* 停靠态下离开本页，交给 flyDockOut 演完收拢。
@@ -507,6 +544,23 @@ onBeforeUnmount(() => {
   min-height: 320px;
   display: flex;
   flex-direction: column;
+}
+
+/* 广告卡片：占用一个词条卡片位，视觉与词条卡片一致但无 hover 位移和点击态 */
+.ad-card {
+  min-height: 320px;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  animation: floatIn 0.6s ease-out;
+}
+
+.ad-card:hover {
+  transform: none;
+}
+
+.ad-card .adsbygoogle {
+  width: 100%;
 }
 
 .liquid-glass-card {
