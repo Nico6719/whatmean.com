@@ -29,11 +29,6 @@ const routes = [
     component: () => import('../views/EntryGenerator.vue')
   },
   {
-    path: '/albums',
-    name: 'Album',
-    component: () => import('../views/Album.vue')
-  },
-  {
     path: '/about',
     name: 'About',
     component: () => import('../views/About.vue')

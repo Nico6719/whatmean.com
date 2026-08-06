@@ -178,7 +178,6 @@ const buildSitemap = (entries, siteUrl) => {
   const staticPages = [
     { path: '/', changefreq: 'daily', priority: '1.0' },
     { path: '/entries', changefreq: 'daily', priority: '0.9' },
-    { path: '/albums', changefreq: 'weekly', priority: '0.7' },
     { path: '/about', changefreq: 'monthly', priority: '0.7' },
     { path: '/entry-generator', changefreq: 'monthly', priority: '0.6' },
     { path: '/friends', changefreq: 'monthly', priority: '0.5' },
