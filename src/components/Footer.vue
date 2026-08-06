@@ -26,6 +26,9 @@
               <router-link to="/entries" class="text-decoration-none text-white-50">最新热梗</router-link>
             </li>
             <li class="mb-2">
+              <router-link to="/albums" class="text-decoration-none text-white-50">可爱楠娘</router-link>
+            </li>
+            <li class="mb-2">
               <router-link to="/entries" class="text-decoration-none text-white-50">热门排行</router-link>
             </li>
             <li class="mb-2">

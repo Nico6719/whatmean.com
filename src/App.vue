@@ -8,7 +8,7 @@ import { morphInFlight } from './composables/useSearchMorph'
 const route = useRoute()
 const transitionName = ref('page-fade')
 
-const routeOrder = ['/', '/entries', '/entry-generator', '/about', '/friends', '/freebies']
+const routeOrder = ['/', '/entries', '/albums', '/entry-generator', '/about', '/friends', '/freebies']
 
 watch(
   () => route.path,

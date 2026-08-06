@@ -16,6 +16,9 @@
                 <router-link class="nav-link" to="/entries">词条</router-link>
               </li>
               <li class="nav-item">
+                <router-link class="nav-link" to="/albums">可爱楠娘</router-link>
+              </li>
+              <li class="nav-item">
                 <router-link class="nav-link" to="/about">关于</router-link>
               </li>
               <li class="nav-item">
@@ -65,6 +68,9 @@
             </li>
             <li class="nav-item">
               <router-link class="nav-link mobile-nav-link" to="/entries" @click="closeMobileMenu">词条</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link class="nav-link mobile-nav-link" to="/albums" @click="closeMobileMenu">可爱楠娘</router-link>
             </li>
             <li class="nav-item">
               <router-link class="nav-link mobile-nav-link" to="/about" @click="closeMobileMenu">关于</router-link>
