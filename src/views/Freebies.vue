@@ -87,16 +87,15 @@ export default {
         {
           name: '雨云',
           description: '国内云服务商，提供云服务器、游戏云和物理服务器，价格便宜，还有推广返利。',
-          url: 'https://www.rainyun.com/Nico6719_',
-          displayUrl: 'https://www.rainyun.com',
+          url: 'https://cloud.qimingidc.cn',
+          displayUrl: 'https://www.qimingidc.cn',
           tags: ['云服务器', '游戏云', '低价']
         },
         {
           name: '启明智联',
           description: '低价购买域名与低价可备案虚拟主机。低价国内外服务器与高防服务器，提供稳定的服务。',
-
-          url: 'https://cloud.qimingidc.cn',
-          displayUrl: 'https://www.qimingidc.cn',
+          url: 'https://www.rainyun.com/Nico6719_',
+          displayUrl: 'https://www.rainyun.com',
           tags: ['云服务器', '虚拟主机', '内容分发', '域名']
         },
         {
