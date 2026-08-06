@@ -53,10 +53,13 @@
         <div v-if="entries.length === 0" class="col-12 text-center">
           <p class="text-white">没有找到词条</p>
         </div>
-        <!-- 广告A-何意味：占用一个词条卡片位 -->
-        <div v-if="entries.length > 0" class="col-xl-3 col-lg-4 col-md-6">
+        <!-- 广告A-何意味：占用一个词条卡片位。
+             adUnfilled 时整格移除 —— AdSense 无广告可投时只给 <ins> 打
+             data-ad-status="unfilled"，容器仍占着 320px，列表里会缺一格 -->
+        <div v-if="entries.length > 0 && !adUnfilled" class="col-xl-3 col-lg-4 col-md-6">
           <div class="card h-100 liquid-glass-card ad-card">
-            <ins class="adsbygoogle"
+            <ins ref="adEl"
+                 class="adsbygoogle"
                  style="display:block;width:100%"
                  data-ad-client="ca-pub-8020398381754493"
                  data-ad-slot="2234470574"
@@ -119,11 +122,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useRoute, onBeforeRouteLeave } from 'vue-router';
 import { useHead } from '@unhead/vue';
 import entriesApi from '../services/api';
-import { loadAdSenseScript, pushAd } from '../services/adsense';
+import { loadAdSenseScript, pushAd, observeAdStatus } from '../services/adsense';
 import MorphModal from '../components/MorphModal.vue';
 import { SITE_URL } from '../config/site';
 import { finishSearchMorph, cancelSearchMorph, morphInFlight } from '../composables/useSearchMorph';
@@ -165,6 +168,12 @@ const activeCardEl = ref(null);
 const cardTimers = ref([]);
 // 首页搜索框飞过来时的落点
 const searchBoxEl = ref(null);
+
+// 广告位：<ins> 元素本体，以及"确认无广告可投"的标记
+const adEl = ref(null);
+const adUnfilled = ref(false);
+// observeAdStatus 返回的清理函数，卸载时调用
+let stopAdObserver = null;
 
 /* ===== 滚动停靠 =====
    搜索框快被固定 Header 盖住时，改为 fixed 贴进 Header 的槽位。
@@ -510,9 +519,35 @@ onMounted(async () => {
   window.addEventListener('resize', evaluateDock);
   evaluateDock();
 
-  // 投放 Google 广告
-  loadAdSenseScript().then(pushAd).catch(() => {});
+  // 预加载 AdSense 脚本；真正投放要等 <ins> 挂上，见下方 watch
+  loadAdSenseScript().catch(() => {
+    // 脚本加载失败（含被拦截器挡掉）：收起整格
+    adUnfilled.value = true;
+  });
 });
+
+/* 广告投放挂在 adEl 出现之后，而不是写在 onMounted 里。
+   onMounted 内 fetchEntries() 没有 await，此刻 loading 仍为真，
+   模板走的是 spinner 分支，<ins> 根本没渲染 —— 那时读 adEl.value
+   拿到 null，push 会被 AdSense 丢弃，状态观察也建不起来。
+   flush: 'post' 等 DOM 更新完再跑；once 避免重复投放同一个广告位。 */
+watch(
+  adEl,
+  (el) => {
+    if (!el) return;
+    loadAdSenseScript()
+      .then(() => {
+        pushAd();
+        stopAdObserver = observeAdStatus(el, (filled) => {
+          adUnfilled.value = !filled;
+        });
+      })
+      .catch(() => {
+        adUnfilled.value = true;
+      });
+  },
+  { flush: 'post', once: true }
+);
 
 /* 停靠态下离开本页，交给 flyDockOut 演完收拢。
    用 onBeforeRouteLeave 而非 onBeforeUnmount：out-in 模式下卸载发生在
@@ -532,6 +567,8 @@ onBeforeUnmount(() => {
   if (activeCardEl.value) resetCard(activeCardEl.value);
   cardTimers.value.forEach(t => clearTimeout(t));
   cancelSearchMorph();
+  // 摘掉广告状态观察，避免 observer 和兜底定时器留在离场后的页面上
+  stopAdObserver?.();
 
   window.removeEventListener('scroll', evaluateDock);
   window.removeEventListener('resize', evaluateDock);

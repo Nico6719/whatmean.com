@@ -33,3 +33,49 @@ export const pushAd = () => {
     console.error('[adsense] 广告投放失败', err);
   }
 };
+
+/**
+ * 监听广告是否填充成功，未填充时通知调用方收起容器。
+ *
+ * AdSense 无广告可投时不会报错，而是给 <ins> 打上
+ * data-ad-status="unfilled"。不处理的话容器仍占着固定高度，
+ * 页面上会留一块空白玻璃板（词条列表里就是缺一格卡片）。
+ *
+ * 用 MutationObserver 盯这个属性：它由外部脚本异步写入，
+ * 时机不确定，一次性读取往往赶在写入之前。
+ *
+ * @param {HTMLElement} el 广告的 <ins> 元素
+ * @param {(filled: boolean) => void} onResolved 填充结果回调
+ * @returns {() => void} 清理函数，组件卸载时调用
+ */
+export const observeAdStatus = (el, onResolved) => {
+  if (!el) return () => {};
+
+  // 属性可能在挂载前就已写好，先查一次
+  const current = el.getAttribute('data-ad-status');
+  if (current) {
+    onResolved(current === 'filled');
+    return () => {};
+  }
+
+  const observer = new MutationObserver(() => {
+    const status = el.getAttribute('data-ad-status');
+    if (!status) return;
+    observer.disconnect();
+    clearTimeout(timer);
+    onResolved(status === 'filled');
+  });
+  observer.observe(el, { attributes: true, attributeFilter: ['data-ad-status'] });
+
+  /* 兜底：脚本被拦截器挡掉时属性永远不会出现，
+     observer 不会触发，容器就一直空占位置。10 秒后按未填充处理。 */
+  const timer = setTimeout(() => {
+    observer.disconnect();
+    onResolved(false);
+  }, 10000);
+
+  return () => {
+    observer.disconnect();
+    clearTimeout(timer);
+  };
+};
